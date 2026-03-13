@@ -1,0 +1,13 @@
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+}
+
+#candidate-root {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}

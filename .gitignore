@@ -1,0 +1,14 @@
+node_modules
+.artifacts/*
+!.artifacts/latest/
+.artifacts/latest/*
+!.artifacts/latest/.gitkeep
+data/targets/*
+!data/targets/.gitkeep
+.pi/agent/
+.pi/sessions/
+playwright-report/
+test-results/
+autoresearch.jsonl
+autoresearch.ideas.md
+*.log

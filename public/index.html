@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Pi Visual Battleground</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <main class="shell">
+      <section class="hero panel">
+        <div class="eyebrow">Pi autoresearch battleground</div>
+        <h1>Upload a target. Let Pi chase the frame.</h1>
+        <p class="lede">
+          The agent edits plain HTML, CSS, and Tailwind utilities until the headless visual diff score gets as close to the uploaded image as it can.
+        </p>
+
+        <div class="command-strip">
+          <code>pnpm battleground</code>
+          <code>pnpm pi</code>
+          <code>/skill:visual-diff-autoresearch</code>
+        </div>
+      </section>
+
+      <section class="controls panel">
+        <div class="controls-head">
+          <div>
+            <div class="eyebrow">Target control</div>
+            <h2>Current frame</h2>
+          </div>
+          <button id="evaluate-button" class="action action-secondary" type="button">
+            Re-evaluate
+          </button>
+        </div>
+
+        <form id="upload-form" class="upload-form">
+          <label class="file-field" for="target-input">
+            <span>Select target image</span>
+            <input id="target-input" name="target" type="file" accept="image/*" />
+          </label>
+          <button class="action" type="submit">Upload and score</button>
+        </form>
+
+        <div class="status-grid">
+          <article class="metric-tile">
+            <span>Similarity</span>
+            <strong id="score-value">--</strong>
+          </article>
+          <article class="metric-tile">
+            <span>Difference</span>
+            <strong id="difference-value">--</strong>
+          </article>
+          <article class="metric-tile">
+            <span>Eval time</span>
+            <strong id="eval-value">--</strong>
+          </article>
+        </div>
+
+        <div class="meta-list">
+          <div>
+            <span>Status</span>
+            <strong id="status-value">Waiting for target</strong>
+          </div>
+          <div>
+            <span>Target</span>
+            <strong id="target-meta">No image uploaded yet.</strong>
+          </div>
+          <div>
+            <span>Editable surface</span>
+            <strong><code>candidate.html</code> + <code>candidate.css</code></strong>
+          </div>
+        </div>
+
+        <p id="feedback" class="feedback"></p>
+      </section>
+
+      <section class="board">
+        <article class="panel frame-card">
+          <div class="frame-head">
+            <div class="eyebrow">Target</div>
+            <h3>Uploaded image</h3>
+          </div>
+          <div class="frame-box">
+            <img id="target-image" alt="Target visual" />
+          </div>
+        </article>
+
+        <article class="panel frame-card">
+          <div class="frame-head">
+            <div class="eyebrow">Preview</div>
+            <h3>Live candidate DOM</h3>
+          </div>
+          <div class="frame-box">
+            <iframe id="preview-frame" title="Candidate preview"></iframe>
+          </div>
+        </article>
+
+        <article class="panel frame-card">
+          <div class="frame-head">
+            <div class="eyebrow">Capture</div>
+            <h3>Scored candidate snapshot</h3>
+          </div>
+          <div class="frame-box">
+            <img id="candidate-image" alt="Candidate capture" />
+          </div>
+        </article>
+
+        <article class="panel frame-card">
+          <div class="frame-head">
+            <div class="eyebrow">Diff</div>
+            <h3>Heatmap of misses</h3>
+          </div>
+          <div class="frame-box">
+            <img id="diff-image" alt="Visual diff heatmap" />
+          </div>
+        </article>
+      </section>
+
+      <section class="history panel">
+        <div class="controls-head">
+          <div>
+            <div class="eyebrow">Autoresearch</div>
+            <h2>Recent runs</h2>
+          </div>
+          <span id="history-name" class="history-name">No loop started yet</span>
+        </div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Commit</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr>
+                <td colspan="5" class="empty-row">No experiment history yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
