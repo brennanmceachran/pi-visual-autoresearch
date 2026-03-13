@@ -10,151 +10,215 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="noise"></div>
-    <main class="shell">
-      <section class="hero panel">
-        <div class="eyebrow">Pi autoresearch battleground</div>
-        <h1>Upload a target. Let Pi chase the frame.</h1>
-        <p class="lede">
-          The agent edits plain HTML, CSS, and Tailwind utilities until the headless visual diff score gets as close to the uploaded image as it can.
-        </p>
-
-        <div class="command-strip">
-          <code>pnpm battleground</code>
-          <code>pnpm pi</code>
-          <code>/skill:visual-diff-autoresearch</code>
-        </div>
-      </section>
-
-      <section class="controls panel">
-        <div class="controls-head">
-          <div>
-            <div class="eyebrow">Target control</div>
-            <h2>Current frame</h2>
-          </div>
-          <button id="evaluate-button" class="action action-secondary" type="button">
-            Re-evaluate
-          </button>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <strong>Pi Visual Autoresearch</strong>
+          <span id="header-state">Watching for new evaluations</span>
         </div>
 
-        <form id="upload-form" class="upload-form">
-          <label class="file-field" for="target-input">
-            <span>Select target image</span>
-            <input id="target-input" name="target" type="file" accept="image/*" />
-          </label>
-          <button class="action" type="submit">Upload and score</button>
-        </form>
-
-        <div class="status-grid">
-          <article class="metric-tile">
-            <span>Similarity</span>
-            <strong id="score-value">--</strong>
-          </article>
-          <article class="metric-tile">
-            <span>Difference</span>
-            <strong id="difference-value">--</strong>
-          </article>
-          <article class="metric-tile">
-            <span>Eval time</span>
-            <strong id="eval-value">--</strong>
-          </article>
-        </div>
-
-        <div class="meta-list">
-          <div>
-            <span>Status</span>
-            <strong id="status-value">Waiting for target</strong>
-          </div>
-          <div>
+        <div class="topbar-meta">
+          <div class="meta-pair">
             <span>Target</span>
-            <strong id="target-meta">No image uploaded yet.</strong>
+            <strong id="target-meta">No target loaded</strong>
           </div>
-          <div>
-            <span>Editable surface</span>
-            <strong><code>candidate.html</code> + <code>candidate.css</code></strong>
+          <div class="meta-pair">
+            <span>Surface</span>
+            <strong><code>candidate.html</code> <code>candidate.css</code></strong>
           </div>
         </div>
+      </header>
 
-        <p id="feedback" class="feedback"></p>
-      </section>
+      <div class="workspace">
+        <main class="main-column">
+          <section class="panel summary-panel">
+            <div class="score-block">
+              <div class="summary-label">Current match</div>
+              <div class="score-line">
+                <strong id="score-value">--</strong>
+                <span class="summary-unit">%</span>
+              </div>
+              <div class="summary-caption">Similarity to the active target</div>
+              <div id="score-delta" class="score-delta">Upload a target to start the run.</div>
+              <div id="status-value" class="status-line">Waiting for first evaluation.</div>
+            </div>
 
-      <section class="board">
-        <article class="panel frame-card">
-          <div class="frame-head">
-            <div class="eyebrow">Target</div>
-            <h3>Uploaded image</h3>
-          </div>
-          <div class="frame-box">
-            <img id="target-image" alt="Target visual" />
-          </div>
-        </article>
+            <div class="curve-block">
+              <div class="panel-head">
+                <div>
+                  <h2>Diff curve</h2>
+                  <p>Lower is better. The line should fall as the agent learns.</p>
+                </div>
 
-        <article class="panel frame-card">
-          <div class="frame-head">
-            <div class="eyebrow">Preview</div>
-            <h3>Live candidate DOM</h3>
-          </div>
-          <div class="frame-box">
-            <iframe id="preview-frame" title="Candidate preview"></iframe>
-          </div>
-        </article>
+                <div class="mini-stats">
+                  <div>
+                    <span>Current</span>
+                    <strong id="difference-value">--</strong>
+                  </div>
+                  <div>
+                    <span>Best</span>
+                    <strong id="best-difference-value">--</strong>
+                  </div>
+                  <div>
+                    <span>Eval</span>
+                    <strong id="eval-value">--</strong>
+                  </div>
+                </div>
+              </div>
 
-        <article class="panel frame-card">
-          <div class="frame-head">
-            <div class="eyebrow">Capture</div>
-            <h3>Scored candidate snapshot</h3>
-          </div>
-          <div class="frame-box">
-            <img id="candidate-image" alt="Candidate capture" />
-          </div>
-        </article>
+              <div class="curve-shell">
+                <svg id="curve-svg" viewBox="0 0 420 180" preserveAspectRatio="none">
+                  <path id="curve-area" class="curve-area" d=""></path>
+                  <path id="curve-path" class="curve-path" d=""></path>
+                  <g id="curve-points"></g>
+                </svg>
+                <div class="curve-axis">
+                  <span id="curve-start-label">Run 1</span>
+                  <span id="curve-end-label">Latest</span>
+                </div>
+              </div>
+            </div>
+          </section>
 
-        <article class="panel frame-card">
-          <div class="frame-head">
-            <div class="eyebrow">Diff</div>
-            <h3>Heatmap of misses</h3>
-          </div>
-          <div class="frame-box">
-            <img id="diff-image" alt="Visual diff heatmap" />
-          </div>
-        </article>
-      </section>
+          <section class="panel arena-panel">
+            <div class="panel-head arena-head">
+              <div>
+                <h2>Watch window</h2>
+                <p>Target, live DOM, scored capture, and diff update as new evaluations land.</p>
+              </div>
+              <button id="evaluate-button" class="action action-secondary" type="button">
+                Evaluate now
+              </button>
+            </div>
 
-      <section class="history panel">
-        <div class="controls-head">
-          <div>
-            <div class="eyebrow">Autoresearch</div>
-            <h2>Recent runs</h2>
-          </div>
-          <span id="history-name" class="history-name">No loop started yet</span>
-        </div>
+            <div class="frame-grid">
+              <article class="frame-card">
+                <div class="frame-bar">
+                  <h3>Target</h3>
+                  <span id="target-dimensions">No target</span>
+                </div>
+                <div class="frame-box">
+                  <img id="target-image" alt="Target visual" />
+                  <div id="target-placeholder" class="frame-empty">Upload a target image.</div>
+                </div>
+              </article>
 
-        <div class="table-shell">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Commit</th>
-                <th>Score</th>
-                <th>Status</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody id="history-body">
-              <tr>
-                <td colspan="5" class="empty-row">No experiment history yet.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+              <article class="frame-card">
+                <div class="frame-bar">
+                  <h3>Scored capture</h3>
+                  <span id="capture-meta">Last evaluated frame</span>
+                </div>
+                <div class="frame-box">
+                  <img id="candidate-image" alt="Candidate capture" />
+                  <div id="candidate-placeholder" class="frame-empty">Run the evaluator to generate a scored capture.</div>
+                </div>
+              </article>
+
+              <article class="frame-card">
+                <div class="frame-bar">
+                  <h3>Diff heatmap</h3>
+                  <span id="diff-meta">Misses should shrink over time</span>
+                </div>
+                <div class="frame-box">
+                  <img id="diff-image" alt="Visual diff heatmap" />
+                  <div id="diff-placeholder" class="frame-empty">Diff output appears after the first evaluation.</div>
+                </div>
+              </article>
+
+              <article class="frame-card frame-card-wide">
+                <div class="frame-bar">
+                  <h3>Live candidate DOM</h3>
+                  <span id="preview-meta">Refreshes while you watch</span>
+                </div>
+                <div class="frame-box">
+                  <iframe id="preview-frame" title="Candidate preview"></iframe>
+                  <div id="preview-placeholder" class="frame-empty">Preview available after the first target is loaded.</div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </main>
+
+        <aside class="sidebar">
+          <section class="panel upload-panel">
+            <div class="panel-head panel-head-compact">
+              <div>
+                <h2>Target input</h2>
+                <p>Replace the active frame and rerun the evaluator.</p>
+              </div>
+            </div>
+
+            <form id="upload-form" class="upload-form">
+              <label class="field-label" for="target-input">Image file</label>
+              <input id="target-input" name="target" type="file" accept="image/*" />
+              <button class="action" type="submit">Upload and score</button>
+            </form>
+
+            <div class="command-list">
+              <div class="command-row">
+                <span>Server</span>
+                <code>pnpm battleground</code>
+              </div>
+              <div class="command-row">
+                <span>Pi</span>
+                <code>pnpm pi</code>
+              </div>
+              <div class="command-row">
+                <span>Skill</span>
+                <code>/skill:visual-diff-autoresearch</code>
+              </div>
+            </div>
+
+            <p id="feedback" class="feedback"></p>
+          </section>
+
+          <section class="panel history-panel">
+            <div class="panel-head panel-head-compact">
+              <div>
+                <h2>Run log</h2>
+                <p id="history-name">No loop started yet</p>
+              </div>
+
+              <div class="mini-stats compact">
+                <div>
+                  <span>Runs</span>
+                  <strong id="run-count">0</strong>
+                </div>
+                <div>
+                  <span>Best</span>
+                  <strong id="best-score-value">--</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-shell">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Commit</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody id="history-body">
+                  <tr>
+                    <td colspan="5" class="empty-row">No experiment history yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
 
     <script type="module" src="/app.js"></script>
   </body>
