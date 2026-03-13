@@ -1,13 +1,283 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f5f4;
+  color: #111827;
 }
 
 #candidate-root {
+  min-height: 100%;
+}
+
+.dashboard {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 3.8% 3.4% 2.8%;
+  background: #f5f5f4;
+}
+
+.section {
+  margin-bottom: 5.8%;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section-head,
+.months,
+.map-wrap,
+.note,
+.legend,
+.stats {
+  width: 96%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 3.35rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.top-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4.7rem;
+  padding-top: 0.15rem;
+}
+
+.top-stat,
+.stat {
+  text-align: right;
+}
+
+.top-stat span,
+.stat span,
+.legend-word,
+.weekday-labels,
+.note,
+.months span {
+  color: #6f6f71;
+}
+
+.top-stat span,
+.stat span {
+  display: block;
+  margin-bottom: 0.24rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.top-stat strong {
+  display: block;
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  margin-top: 2.35rem;
+  margin-bottom: 1rem;
+  padding-left: 3.5%;
+  font-size: 0.78rem;
+}
+
+.months span {
+  text-align: left;
+}
+
+.map-wrap {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.85rem;
+}
+
+.weekday-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.15rem 0 0.4rem;
+  font-size: 0.76rem;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(52, minmax(0, 1fr));
+  gap: 0.36rem;
+  min-height: 9.9rem;
+}
+
+.cell,
+.codex-grid::before,
+.open-grid::before {
+  aspect-ratio: 1;
+  border-radius: 0.28rem;
+}
+
+.cell {
+  background: #ededec;
+}
+
+.note {
+  margin-top: 0.72rem;
+  margin-bottom: 0.9rem;
+  padding-left: 19%;
+  font-size: 0.72rem;
+  text-wrap: balance;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 4.2rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.legend-scale {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.swatch {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 0.3rem;
+  background: #ededec;
+}
+
+.orange-0 { background: #f3ede1; }
+.orange-1 { background: #f2d19d; }
+.orange-2 { background: #efb76d; }
+.orange-3 { background: #f17d1d; }
+.orange-4 { background: #d45b08; }
+.blue-0 { background: #c6d2fb; }
+.blue-1 { background: #a6b7f5; }
+.blue-2 { background: #8ea1ee; }
+.blue-3 { background: #5a67db; }
+.blue-4 { background: #3940a8; }
+.gray-0 { background: #d7d7d7; }
+.gray-1 { background: #bdbdbd; }
+.gray-2 { background: #9f9f9f; }
+.gray-3 { background: #5c5c5f; }
+.gray-4 { background: #2f2f31; }
+.gray-5 { background: #161617; }
+
+.stats {
+  display: grid;
+  grid-template-columns: 1.55fr 1.55fr 1fr 1fr;
+  gap: 1.8rem;
+}
+
+.stat {
+  text-align: left;
+}
+
+.stat strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.stat em {
+  color: #666668;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.codex-grid,
+.open-grid {
   position: relative;
-  overflow: hidden;
-  isolation: isolate;
+  min-height: 0;
+  background-image:
+    linear-gradient(#ededec, #ededec);
+  background-size: calc((100% - 51 * 0.36rem) / 52) calc((100% - 6 * 0.36rem) / 7);
+  background-repeat: space;
+}
+
+.codex-grid,
+.open-grid {
+  display: grid;
+  grid-template-columns: repeat(52, minmax(0, 1fr));
+  grid-template-rows: repeat(7, 1fr);
+  gap: 0.36rem;
+}
+
+.codex-grid::before,
+.open-grid::before {
+  content: "";
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+}
+
+.codex-grid {
+  background:
+    radial-gradient(circle at 60.1% 6.5%, #3940a8 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 57.4% 57%, #5a67db 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 60.1% 39%, #5a67db 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 92.6% 55.5%, #8ea1ee 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 98.7% 72.3%, #8ea1ee 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 68% 89%, #8ea1ee 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 73.5% 89%, #8ea1ee 0 1.1%, transparent 1.2%),
+    linear-gradient(#ededec, #ededec);
+  background-size: auto, auto, auto, auto, auto, auto, auto, calc((100% - 51 * 0.36rem) / 52) calc((100% - 6 * 0.36rem) / 7);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, space;
+}
+
+.open-grid {
+  background:
+    radial-gradient(circle at 86.3% 5.5%, #5c5c5f 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 82.4% 22%, #5c5c5f 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 89.9% 22%, #5c5c5f 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 82.4% 39%, #161617 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 81.2% 55.5%, #2f2f31 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 89.9% 55.5%, #5c5c5f 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 81.2% 72%, #161617 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 89.9% 72%, #5c5c5f 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 95.9% 72%, #2f2f31 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 81.2% 88.5%, #161617 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 87.5% 88.5%, #5c5c5f 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 85% 100%, #161617 0 1.1%, transparent 1.2%),
+    linear-gradient(#ededec, #ededec);
+  background-size: auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, calc((100% - 51 * 0.36rem) / 52) calc((100% - 6 * 0.36rem) / 7);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, space;
+}
+
+@media (max-width: 900px) {
+  .section-head,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .section-head {
+    flex-direction: column;
+  }
+
+  .top-stats,
+  .stats {
+    width: 100%;
+    gap: 1rem;
+  }
 }
