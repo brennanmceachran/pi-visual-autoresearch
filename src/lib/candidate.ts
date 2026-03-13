@@ -12,16 +12,117 @@ export interface StageSize {
   height: number;
 }
 
+interface CandidateFiles {
+  html: string;
+  css: string;
+}
+
+interface CandidateValidationRule {
+  pattern: RegExp;
+  message: string;
+}
+
+const HTML_VALIDATION_RULES: CandidateValidationRule[] = [
+  {
+    pattern:
+      /<\s*(?:[a-z0-9-]+:)?(?:img|picture|source|video|audio|canvas|iframe|frame|object|embed|link|script)\b/i,
+    message: "HTML cannot contain asset-loading, canvas, iframe, or script elements."
+  },
+  {
+    pattern: /<\s*(?:[a-z0-9-]+:)?(?:image|feimage)\b/i,
+    message: "Inline SVG cannot embed raster image elements."
+  },
+  {
+    pattern: /\bon[a-z]+\s*=/i,
+    message: "Inline event handlers are forbidden."
+  },
+  {
+    pattern: /\b(?:src|srcset|poster)\s*=/i,
+    message: "Source-style attributes are forbidden."
+  },
+  {
+    pattern: /\b(?:href|xlink:href)\s*=\s*(['"])\s*(?!#)/i,
+    message: "Only fragment-only href values such as #mask are allowed."
+  },
+  {
+    pattern: /\bdata\s*:/i,
+    message: "Embedded data URIs are forbidden."
+  }
+];
+
+const CSS_VALIDATION_RULES: CandidateValidationRule[] = [
+  {
+    pattern: /@import\b/i,
+    message: "CSS @import is forbidden."
+  },
+  {
+    pattern: /\bdata\s*:/i,
+    message: "Embedded data URIs are forbidden."
+  }
+];
+
+export class CandidateValidationError extends Error {
+  readonly violations: string[];
+
+  constructor(violations: string[]) {
+    super(`Candidate validation failed:\n- ${violations.join("\n- ")}`);
+    this.name = "CandidateValidationError";
+    this.violations = violations;
+  }
+}
+
+function truncateValue(value: string) {
+  const singleLine = value.replace(/\s+/g, " ").trim();
+  if (singleLine.length <= 80) return singleLine;
+  return `${singleLine.slice(0, 77)}...`;
+}
+
+function findNonFragmentUrls(source: string, label: "HTML" | "CSS") {
+  const violations: string[] = [];
+  const urlPattern = /url\(\s*(['"]?)(.*?)\1\s*\)/gis;
+
+  for (const match of source.matchAll(urlPattern)) {
+    const value = (match[2] ?? "").trim();
+    if (!value.startsWith("#")) {
+      violations.push(`${label} cannot reference external assets via url(): ${truncateValue(value) || "(empty)"}`);
+    }
+  }
+
+  return violations;
+}
+
+export function validateCandidateFiles(files: CandidateFiles) {
+  const violations: string[] = [];
+
+  for (const rule of HTML_VALIDATION_RULES) {
+    if (rule.pattern.test(files.html)) violations.push(rule.message);
+  }
+
+  for (const rule of CSS_VALIDATION_RULES) {
+    if (rule.pattern.test(files.css)) violations.push(rule.message);
+  }
+
+  violations.push(...findNonFragmentUrls(files.html, "HTML"));
+  violations.push(...findNonFragmentUrls(files.css, "CSS"));
+
+  if (violations.length > 0) {
+    throw new CandidateValidationError([...new Set(violations)]);
+  }
+}
+
 export async function readCandidateFiles() {
   const [html, css] = await Promise.all([
     readFile(CANDIDATE_HTML_PATH, "utf8"),
     readFile(CANDIDATE_CSS_PATH, "utf8")
   ]);
 
-  return {
+  const files = {
     html: html.trim(),
     css: css.trim()
   };
+
+  validateCandidateFiles(files);
+  return files;
 }
 
 export function buildStageSize(size?: Partial<StageSize> | null): StageSize {
@@ -108,4 +209,3 @@ ${compiledCss}
   </body>
 </html>`;
 }
-

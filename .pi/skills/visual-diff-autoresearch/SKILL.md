@@ -61,6 +61,9 @@ Do not edit files in `data/targets/` or `.artifacts/` unless the user explicitly
 - Use Tailwind utility classes in `candidate.html` for rapid iteration.
 - Use `candidate.css` only for custom gradients, masks, or effects that are awkward in Tailwind.
 - Avoid animation, filters that depend on browser timing, and anything random.
+- Never cheat by embedding or fetching the target pixels. No `data:` URIs, no `<img>`, `<picture>`, `<canvas>`, `<iframe>`, `<script>`, `<object>`, no `src`/`srcset`/`poster`, and no CSS `url(...)` values except fragment-only references like `url(#mask)`.
+- Stay inside honest reconstruction primitives: DOM layout, Tailwind utilities, custom CSS, and inline SVG vector shapes.
+- If the evaluator reports a validation failure, remove the forbidden construct and continue with an honest approximation.
 
 ## autoresearch.sh
 

@@ -55,3 +55,4 @@ pnpm research:agent
 - Pi is launched with `PI_CODING_AGENT_DIR` set to this repo's `.pi/agent`, and with `--no-skills` / `--no-extensions` so it does not pull in global user skills or extensions.
 - The evaluator writes artifacts to `.artifacts/latest/`. These are ignored by git so the autoresearch loop does not accidentally commit screenshots.
 - `autoresearch.jsonl` is intentionally ignored so experiment history survives `git checkout -- .` reverts.
+- The scorer rejects cheating candidates. Embedded target pixels, fetches, `data:` URIs, asset tags, and non-fragment CSS `url(...)` references all fail before scoring.

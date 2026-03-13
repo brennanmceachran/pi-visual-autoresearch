@@ -12,12 +12,207 @@ body,
 
 #candidate-root {
   overflow: hidden;
-  background: white;
 }
 
-.target-clone {
-  display: block;
+.honest-stage {
+  position: relative;
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(242, 136, 44, 0.2), transparent 22%),
+    radial-gradient(circle at 82% 24%, rgba(23, 72, 140, 0.16), transparent 28%),
+    linear-gradient(180deg, #f8f4ed 0%, #efe8dc 100%);
+  color: #1e1b16;
+  font-family: "IBM Plex Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.honest-halo {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(8px);
+  opacity: 0.75;
+}
+
+.honest-halo-left {
+  top: 6%;
+  left: -6%;
+  width: 24%;
+  height: 16%;
+  background: linear-gradient(135deg, rgba(245, 152, 63, 0.34), rgba(255, 255, 255, 0));
+}
+
+.honest-halo-right {
+  right: 2%;
+  bottom: 8%;
+  width: 20%;
+  height: 18%;
+  background: linear-gradient(135deg, rgba(31, 80, 150, 0.24), rgba(255, 255, 255, 0));
+}
+
+.honest-card {
+  position: relative;
+  margin: 3.25%;
+  border: 1px solid rgba(30, 27, 22, 0.08);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 24px 70px rgba(44, 30, 8, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.honest-card-primary {
+  height: 72%;
+  padding: 3.4% 3.6% 2.9%;
+}
+
+.honest-card-secondary {
+  height: calc(100% - 72% - 13%);
+  padding: 2.2% 3.2%;
+}
+
+.honest-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 3.4%;
+}
+
+.honest-kicker,
+.honest-label {
+  display: block;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(52, 47, 39, 0.68);
+}
+
+.honest-kicker {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.honest-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.honest-badges {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.honest-badge {
+  border-radius: 999px;
+  border: 1px solid rgba(30, 27, 22, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.52rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(30, 27, 22, 0.74);
+}
+
+.honest-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 1.2rem;
+  height: 62%;
+}
+
+.honest-panel,
+.honest-curve,
+.honest-metrics article {
+  border-radius: 24px;
+  border: 1px solid rgba(30, 27, 22, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 239, 230, 0.88));
+}
+
+.honest-panel {
+  padding: 1.2rem;
+}
+
+.honest-lines {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.2rem;
+}
+
+.honest-lines span {
+  display: block;
+  height: 1rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(33, 28, 21, 0.1), rgba(242, 136, 44, 0.28));
+}
+
+.honest-lines span:nth-child(2) {
+  width: 76%;
+}
+
+.honest-lines span:nth-child(3) {
+  width: 58%;
+}
+
+.honest-cells {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1.1rem;
+}
+
+.honest-cells span {
+  aspect-ratio: 1;
+  border-radius: 18px;
+  background: rgba(233, 229, 222, 0.96);
+}
+
+.honest-cells span:nth-child(2),
+.honest-cells span:nth-child(8),
+.honest-cells span:nth-child(11) {
+  background: #f2b46f;
+}
+
+.honest-cells span:nth-child(4),
+.honest-cells span:nth-child(10) {
+  background: #f07c1c;
+}
+
+.honest-curve {
+  position: absolute;
+  left: 3.6%;
+  right: 3.6%;
+  bottom: 2.9%;
+  height: 21%;
+  padding: 1rem 1.1rem;
+}
+
+.honest-curve-line {
+  position: absolute;
+  left: 1.1rem;
+  right: 1.1rem;
+  bottom: 1.15rem;
+  top: 2.3rem;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(240, 124, 28, 0.12), rgba(240, 124, 28, 0)),
+    linear-gradient(135deg, transparent 0 12%, rgba(240, 124, 28, 0.2) 12% 12.8%, transparent 12.8% 24%, rgba(240, 124, 28, 0.2) 24% 24.8%, transparent 24.8% 35%, rgba(240, 124, 28, 0.2) 35% 35.8%, transparent 35.8% 48%, rgba(240, 124, 28, 0.2) 48% 48.8%, transparent 48.8% 61%, rgba(240, 124, 28, 0.2) 61% 61.8%, transparent 61.8% 73%, rgba(240, 124, 28, 0.2) 73% 73.8%, transparent 73.8% 100%),
+    linear-gradient(165deg, transparent 0 8%, rgba(240, 124, 28, 0.92) 8% 10%, transparent 10% 16%, rgba(240, 124, 28, 0.92) 16% 18%, transparent 18% 27%, rgba(240, 124, 28, 0.92) 27% 29%, transparent 29% 42%, rgba(240, 124, 28, 0.92) 42% 44%, transparent 44% 58%, rgba(240, 124, 28, 0.92) 58% 60%, transparent 60% 72%, rgba(240, 124, 28, 0.92) 72% 74%, transparent 74% 100%);
+}
+
+.honest-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  height: 100%;
+}
+
+.honest-metrics article {
+  padding: 1rem 1.1rem;
+}
+
+.honest-metrics strong {
+  display: block;
+  margin-top: 0.7rem;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
 }

@@ -23,3 +23,6 @@ Optimize the visual similarity score between the current target image in `data/t
 - Use Tailwind utility classes in `candidate.html` when possible. Use `candidate.css` for anything custom that would be awkward in utilities.
 - The rendered component should fit the full target frame. The evaluator sets the stage size from the current target dimensions.
 - Avoid animations, timers, and random values in the candidate.
+- Never embed or fetch the target image. No `data:` URIs, no `<img>`, `<picture>`, `<canvas>`, `<iframe>`, `<script>`, `<object>`, or similar asset-loading elements.
+- Do not use `src`, `srcset`, `poster`, non-fragment `href`, or CSS `url(...)` values that point at files, network resources, or the battleground API. Only DOM, CSS, Tailwind, and inline SVG vectors are allowed.
+- The evaluator rejects cheating candidates before scoring. If a run fails with a validation error, rewrite the candidate honestly instead of trying to bypass the rule.

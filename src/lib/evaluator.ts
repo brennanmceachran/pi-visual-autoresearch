@@ -394,6 +394,13 @@ export async function evaluateCurrentTarget(): Promise<EvaluationReport> {
       },
       deviceScaleFactor: 1
     });
+    const blockedRequests = new Set<string>();
+
+    await page.route("**/*", (route) => {
+      const request = route.request();
+      blockedRequests.add(`${request.resourceType()}: ${request.url()}`);
+      void route.abort("blockedbyclient");
+    });
 
     await page.setContent(previewDocument, { waitUntil: "load" });
     await page.locator("#candidate-root").waitFor();
@@ -403,6 +410,14 @@ export async function evaluateCurrentTarget(): Promise<EvaluationReport> {
       }
     });
     await page.waitForTimeout(80);
+
+    if (blockedRequests.size > 0) {
+      const examples = [...blockedRequests].slice(0, 3).join(", ");
+      throw new Error(
+        `Candidate attempted to load blocked external resources: ${examples}`
+      );
+    }
+
     await page.addScriptTag({ content: BROWSER_DIFF_SCRIPT });
 
     const candidatePng = await page.locator("#candidate-root").screenshot({
