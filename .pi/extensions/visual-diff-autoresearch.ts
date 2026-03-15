@@ -1,3 +1,4 @@
+import type { ImageContent, TextContent } from "@mariozechner/pi-ai";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 
@@ -28,7 +29,7 @@ function block(reason: string) {
 }
 
 function appendToolResultNote(
-  content: { type: "text"; text: string }[] | unknown[],
+  content: (TextContent | ImageContent)[],
   note: string
 ) {
   const nextContent = [...content];
