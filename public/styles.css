@@ -204,7 +204,10 @@ code {
   min-width: 244px;
 }
 
-.launch-file-input,
+.launch-file-input {
+  display: none;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
