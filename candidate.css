@@ -1,8 +1,8 @@
 :root {
-  --bg: #000000;
-  --text: #f3efe8;
-  --muted: #8c8884;
-  --outline: #2f3c73;
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #7f7f7f;
+  --outline: transparent;
   --warm-0: #f4f4f2;
   --warm-1: #ffe5b8;
   --warm-2: #ffd180;
@@ -38,7 +38,7 @@ body {
 .page {
   width: 4000px;
   min-height: 5014px;
-  background: #000;
+  background: #fff;
   padding: 142px 110px 40px;
 }
 
@@ -61,12 +61,12 @@ body {
   line-height: 1;
   font-weight: 700;
   letter-spacing: -0.045em;
-  color: rgba(245, 242, 237, 0.26);
+  color: #111111;
 }
 
 .outlined {
-  -webkit-text-stroke: 3px var(--outline);
-  text-shadow: 0 0 1px rgba(89, 111, 198, 0.38);
+  -webkit-text-stroke: 0 transparent;
+  text-shadow: none;
 }
 
 .metric-row {
@@ -80,7 +80,7 @@ body {
 
 .metric-label,
 .stat-label {
-  color: #aca7a1;
+  color: #6f6f6f;
   font-size: 28px;
   line-height: 1.1;
   font-weight: 700;
@@ -92,7 +92,7 @@ body {
   font-size: 64px;
   line-height: 1;
   font-weight: 700;
-  color: rgba(245, 242, 237, 0.3);
+  color: #111111;
 }
 
 .months-row {
@@ -100,7 +100,7 @@ body {
   grid-template-columns: 120px repeat(13, 1fr);
   width: 3760px;
   margin-bottom: 40px;
-  color: #98948f;
+  color: #777777;
   font-size: 44px;
   line-height: 1;
 }
@@ -118,15 +118,15 @@ body {
   width: 86px;
   display: grid;
   grid-template-rows: repeat(7, 62px);
-  color: #98948f;
+  color: #777777;
   font-size: 44px;
   line-height: 62px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(53, 68px);
-  grid-template-rows: repeat(7, 68px);
+  grid-template-columns: repeat(53, 69px);
+  grid-template-rows: repeat(7, 69px);
   gap: 0;
   justify-items: center;
   align-items: center;
@@ -134,8 +134,8 @@ body {
 
 .cell,
 .legend-box {
-  width: 68px;
-  height: 68px;
+  width: 69px;
+  height: 69px;
   border-radius: 0;
   display: block;
 }
@@ -161,7 +161,7 @@ body {
 
 .note {
   margin: 28px 0 0 760px;
-  color: #98948f;
+  color: #777777;
   font-size: 28px;
   line-height: 1.25;
 }
@@ -174,7 +174,7 @@ body {
 }
 
 .legend-text {
-  color: #98948f;
+  color: #444444;
   font-size: 42px;
   font-weight: 700;
   line-height: 1;
@@ -198,7 +198,7 @@ body {
   font-size: 62px;
   line-height: 1.08;
   font-weight: 700;
-  color: rgba(245, 242, 237, 0.28);
+  color: #111111;
 }
 
 .subtle { font-weight: 600; }
