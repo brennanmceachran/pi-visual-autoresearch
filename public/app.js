@@ -46,7 +46,7 @@ const elements = {
   targetPlaceholder: document.querySelector("#target-placeholder"),
   diffImage: document.querySelector("#diff-image"),
   diffPlaceholder: document.querySelector("#diff-placeholder"),
-  previewFrame: document.querySelector("#preview-frame"),
+  previewImage: document.querySelector("#preview-image"),
   previewPlaceholder: document.querySelector("#preview-placeholder"),
   compareView: document.querySelector("#compare-view"),
   compareStage: document.querySelector("#compare-stage"),
@@ -576,7 +576,6 @@ function renderImages(appState, options = {}) {
   const reportKey = report ? `${report.generatedAt}:${report.target.updatedAt}` : null;
   const cacheBust = `ts=${Date.now()}`;
   const targetUrl = target?.url ? `${target.url}?${cacheBust}` : "";
-  const previewUrl = target ? `/api/preview?${cacheBust}` : "";
   const candidateUrl = report?.artifacts?.candidate ? `${report.artifacts.candidate}?${cacheBust}` : "";
   const diffUrl = report?.artifacts?.diff ? `${report.artifacts.diff}?${cacheBust}` : "";
 
@@ -590,9 +589,9 @@ function renderImages(appState, options = {}) {
     state.lastTargetKey = targetKey;
   }
 
-  setFrameVisibility(elements.previewFrame, elements.previewPlaceholder, previewUrl);
-
   if (options.force || state.lastReportKey !== reportKey) {
+    setFrameVisibility(elements.previewImage, elements.previewPlaceholder, candidateUrl);
+
     if (targetUrl) {
       elements.compareBaseImage.src = targetUrl;
     } else {
@@ -633,9 +632,9 @@ function renderImages(appState, options = {}) {
       : "Diff heatmap appears after the first evaluation.";
   }
 
-  elements.previewMeta.textContent = target
-    ? "Locked to target frame"
-    : "Preview available after target upload";
+  elements.previewMeta.textContent = report
+    ? `Captured ${formatRelativeAge(report.generatedAt)}`
+    : "Appears after the first evaluation";
   elements.diffMeta.textContent = report
     ? formatRelativeAge(report.generatedAt)
     : "No capture yet";

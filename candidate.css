@@ -27,7 +27,7 @@ body {
 .dashboard {
   width: 4000px;
   min-height: 5014px;
-  padding: calc(38px * var(--u)) calc(36px * var(--u)) calc(40px * var(--u));
+  padding: calc(38px * var(--u)) calc(38px * var(--u)) calc(40px * var(--u));
   background: var(--bg);
 }
 
