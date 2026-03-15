@@ -65,7 +65,7 @@ h2 {
 .label {
   font-size: calc(10px * var(--u));
   line-height: 1.2;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.079em;
   color: #666a73;
   font-weight: 700;
 }
