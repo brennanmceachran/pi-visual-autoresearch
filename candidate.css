@@ -133,7 +133,7 @@ h2 {
 
 .cell,
 .chip {
-  border-radius: calc(4px * var(--u));
+  border-radius: calc(3.6px * var(--u));
   background: var(--soft);
 }
 
