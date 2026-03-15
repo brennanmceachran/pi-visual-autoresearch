@@ -47,7 +47,7 @@ h2 {
   font-size: calc(31px * var(--u));
   line-height: 1.05;
   font-weight: 700;
-  letter-spacing: -0.039em;
+  letter-spacing: -0.0385em;
 }
 
 .stats,
