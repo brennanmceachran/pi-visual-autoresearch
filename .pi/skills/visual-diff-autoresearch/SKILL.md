@@ -60,8 +60,8 @@ Do not inspect or edit private battleground paths such as `.pi/private/targets/`
 - Use Tailwind utility classes in `candidate.html` for rapid iteration.
 - Use `candidate.css` only for custom gradients, masks, or effects that are awkward in Tailwind.
 - Avoid animation, filters that depend on browser timing, and anything random.
-- Never cheat by embedding or fetching the target pixels. No `data:` URIs, no `<img>`, `<picture>`, `<canvas>`, `<iframe>`, `<script>`, `<object>`, no `src`/`srcset`/`poster`, and no CSS `url(...)` values except fragment-only references like `url(#mask)`.
-- Stay inside honest reconstruction primitives: DOM layout, Tailwind utilities, custom CSS, and inline SVG vector shapes.
+- Never cheat by embedding or fetching the target pixels. Honest reconstruction may use DOM layout, Tailwind, custom CSS, inline SVG, canvas, and script, but must not depend on private battleground paths, network fetches, or `data:` URIs.
+- If an asset request is blocked by the evaluator, do not try alternate fetch paths. Reconstruct the frame honestly instead.
 - If the evaluator reports a validation failure, remove the forbidden construct and continue with an honest approximation.
 - If visual feedback is missing from `run_experiment`, do not read the artifact images directly. Treat it as a battleground bug and continue only after that bug is fixed.
 

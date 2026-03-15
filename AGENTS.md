@@ -27,7 +27,7 @@ Optimize the visual similarity score between the active private target image and
 - Use Tailwind utility classes in `candidate.html` when possible. Use `candidate.css` for anything custom that would be awkward in utilities.
 - The rendered component should fit the full target frame. The evaluator sets the stage size from the current target dimensions.
 - Avoid animations, timers, and random values in the candidate.
-- Never embed or fetch the target image. No `data:` URIs, no `<img>`, `<picture>`, `<canvas>`, `<iframe>`, `<script>`, `<object>`, or similar asset-loading elements.
-- Do not use `src`, `srcset`, `poster`, non-fragment `href`, or CSS `url(...)` values that point at files, network resources, or the battleground API. Only DOM, CSS, Tailwind, and inline SVG vectors are allowed.
+- Never embed or fetch the target image or scorer artifacts. Honest reconstruction may use normal DOM, CSS, SVG, canvas, or script primitives, but must not depend on private battleground paths, network fetches, or `data:` URIs.
+- If asset loading is attempted, the evaluator will block network/private-path requests. Treat that as a cue to reconstruct honestly rather than trying another fetch path.
 - The evaluator rejects cheating candidates before scoring. If a run fails with a validation error, rewrite the candidate honestly instead of trying to bypass the rule.
 - Never fall back to reading artifact images directly. If visual feedback is missing from `run_experiment`, treat that as a battleground bug rather than reading `.artifacts/latest/*.png`.

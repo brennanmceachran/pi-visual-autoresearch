@@ -17,45 +17,52 @@
   </head>
   <body>
     <div class="app">
-      <section class="panel launch-shell">
-        <div class="launch-grid" aria-label="Session readiness">
-          <div class="launch-brand">
-            <div class="launch-copy">
-              <div class="launch-eyebrow">Pi Visual Autoresearch</div>
-              <div class="launch-brandline">Visual Diff Battleground</div>
+      <section class="panel dashboard-shell">
+        <section class="launch-shell">
+          <div class="launch-grid" aria-label="Session readiness">
+            <div class="launch-brand">
+              <div class="launch-copy">
+                <div class="launch-eyebrow">Pi Visual Autoresearch</div>
+                <div class="launch-brandline">Visual Diff Battleground</div>
+              </div>
+              <p id="header-state" class="launch-description">
+                The server is live. Load a target, let Pi iterate, and watch the diff tighten.
+              </p>
             </div>
-            <p id="header-state" class="launch-description">
-              The server is live. Add a target, start Pi, and run the local skill to begin the loop.
-            </p>
-          </div>
 
-          <form id="upload-form" class="launch-target-panel" aria-label="Target setup">
-            <label class="sr-only" for="target-input">Target image</label>
-            <input id="target-input" class="launch-file-input" name="target" type="file" accept="image/*" />
+            <div class="launch-context" aria-label="Active session">
+              <div class="launch-context-copy">
+                <span class="launch-context-label">Active target</span>
+                <strong id="target-summary" class="launch-context-value">No target loaded</strong>
+                <span class="launch-context-meta">Scoring refreshes every 4 seconds. Lower diff is better.</span>
+              </div>
+            </div>
 
-            <div class="launch-target-copy">
-              <div class="launch-panel-label-row">
-                <span class="launch-step-icon" aria-hidden="true"></span>
-                <div class="launch-slot-text">
-                  <span class="launch-step-label">Target</span>
-                  <span id="target-check-meta" class="launch-step-meta">No target loaded</span>
-                </div>
+            <form id="upload-form" class="launch-actions" aria-label="Target setup">
+              <label class="sr-only" for="target-input">Target image</label>
+              <input id="target-input" class="launch-file-input" name="target" type="file" accept="image/*" />
+              <div class="launch-target-controls">
+                <label for="target-input" class="launch-link-control">Select image</label>
+                <button id="upload-button" class="action launch-button" type="submit">Upload target</button>
               </div>
               <span id="selected-file" class="launch-selection is-empty">No replacement selected</span>
-            </div>
+            </form>
+          </div>
 
-            <div class="launch-target-controls">
-              <label for="target-input" class="launch-link-control">Select image</label>
-              <button id="upload-button" class="action launch-button" type="submit">Upload target</button>
-            </div>
-          </form>
-
-          <div class="launch-ops">
+          <div class="launch-readiness" aria-label="Readiness checklist">
             <div class="launch-checkline is-done" id="check-server">
               <span class="launch-step-icon" aria-hidden="true"></span>
               <div class="launch-slot-copy">
                 <span class="launch-step-label">Server</span>
                 <span class="launch-step-meta">127.0.0.1:4242</span>
+              </div>
+            </div>
+
+            <div class="launch-checkline" id="check-target">
+              <span class="launch-step-icon" aria-hidden="true"></span>
+              <div class="launch-slot-copy">
+                <span class="launch-step-label">Target</span>
+                <span id="target-check-meta" class="launch-step-meta">waiting for upload</span>
               </div>
             </div>
 
@@ -75,14 +82,13 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <p id="feedback" class="feedback launch-feedback"></p>
-      </section>
+          <p id="feedback" class="feedback launch-feedback"></p>
+        </section>
 
-      <div class="workspace">
-        <main class="main-column">
-          <div class="panel evaluation-shell">
+        <div class="dashboard-body">
+          <main class="main-column">
+            <section class="evaluation-shell">
             <section class="summary-panel">
               <div class="summary-rail">
                 <div class="score-block">
@@ -229,35 +235,43 @@
                 </article>
               </div>
             </section>
-          </div>
-        </main>
+            </section>
+          </main>
 
-        <aside class="sidebar">
-          <section class="panel history-panel">
-            <div class="panel-head panel-head-compact">
-              <div>
-                <h2>Run log</h2>
-                <p id="history-name">No loop started yet</p>
+          <aside class="sidebar">
+            <section class="history-panel">
+              <div class="panel-head panel-head-compact">
+                <div>
+                  <h2>Run log</h2>
+                  <p id="history-name">No loop started yet</p>
+                </div>
+
+                <div class="mini-stats compact">
+                  <div>
+                    <span>Runs</span>
+                    <strong id="run-count">0</strong>
+                  </div>
+                  <div>
+                    <span>Best</span>
+                    <strong id="best-score-value">--</strong>
+                  </div>
+                </div>
               </div>
 
-              <div class="mini-stats compact">
-                <div>
-                  <span>Runs</span>
-                  <strong id="run-count">0</strong>
-                </div>
-                <div>
-                  <span>Best</span>
-                  <strong id="best-score-value">--</strong>
-                </div>
+              <div class="history-log-head" aria-hidden="true">
+                <span>Run</span>
+                <span>Commit</span>
+                <span>Score</span>
+                <span>Status</span>
               </div>
-            </div>
 
-            <div id="history-list" class="history-list">
-              <article class="history-item history-item-empty">No experiment history yet.</article>
-            </div>
-          </section>
-        </aside>
-      </div>
+              <div id="history-list" class="history-list">
+                <article class="history-item history-item-empty">No experiment history yet.</article>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
     </div>
 
     <script type="module" src="/app.js"></script>

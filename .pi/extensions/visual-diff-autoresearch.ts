@@ -57,6 +57,15 @@ type ToolResultPatch = {
   isError?: boolean;
 };
 
+type RunExperimentDetails = {
+  exitCode?: number;
+  durationSeconds?: number;
+  passed?: boolean;
+  crashed?: boolean;
+  timedOut?: boolean;
+  tailOutput?: string;
+};
+
 export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
   pi.on("session_start", async () => {
     applyActiveTools(pi);
@@ -126,11 +135,39 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
     if (event.toolName !== "run_experiment") return;
     if (typeof event.input.command !== "string") return;
     if (event.input.command.trim() !== "pnpm research:score") return;
-    if (event.isError) return;
+
+    const details = (event.details ?? {}) as RunExperimentDetails;
+    const passed =
+      event.isError !== true &&
+      details.passed === true &&
+      details.exitCode === 0 &&
+      details.timedOut !== true &&
+      details.crashed !== true;
+
+    if (!passed) {
+      return {
+        content: appendToolResultNote(
+          event.content,
+          "No scorer images attached because this evaluation failed. Ignore any older target, candidate, or diff artifacts."
+        )
+      };
+    }
 
     try {
-      const feedbackBlocks = await buildScoreFeedbackBlocks();
-      if (!feedbackBlocks) return;
+      const eventTime = new Date(event.timestamp).getTime();
+      const durationMs = Math.max(0, (details.durationSeconds ?? 0) * 1000);
+      const minGeneratedAt = Number.isFinite(eventTime)
+        ? eventTime - durationMs - 2_000
+        : undefined;
+      const feedbackBlocks = await buildScoreFeedbackBlocks({ minGeneratedAt });
+      if (!feedbackBlocks) {
+        return {
+          content: appendToolResultNote(
+            event.content,
+            "No fresh scorer images were attached for this run. Ignore any older target, candidate, or diff artifacts."
+          )
+        };
+      }
 
       return {
         content: [
