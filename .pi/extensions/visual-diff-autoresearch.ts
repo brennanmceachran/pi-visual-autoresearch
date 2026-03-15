@@ -1,5 +1,8 @@
 import type { ImageContent, TextContent } from "@mariozechner/pi-ai";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type {
+  ExtensionAPI,
+  ToolResultEvent
+} from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 
 import { ROOT_DIR } from "../../src/lib/paths.js";
@@ -52,6 +55,12 @@ function appendToolResultNote(
 
   return [{ type: "text", text: note }, ...nextContent];
 }
+
+type ToolResultPatch = {
+  content?: (TextContent | ImageContent)[];
+  details?: unknown;
+  isError?: boolean;
+};
 
 export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
   pi.on("session_start", async () => {
@@ -116,7 +125,9 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
     }
   });
 
-  pi.on("tool_result", async (event) => {
+  const handleToolResult = async (
+    event: ToolResultEvent
+  ): Promise<ToolResultPatch | undefined> => {
     if (event.toolName !== "run_experiment") return;
     if (typeof event.input.command !== "string") return;
     if (event.input.command.trim() !== "pnpm research:score") return;
@@ -144,5 +155,7 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
         )
       };
     }
-  });
+  };
+
+  pi.on("tool_result", handleToolResult);
 }
