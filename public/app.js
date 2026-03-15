@@ -33,6 +33,8 @@ const elements = {
   bestDifferenceValue: document.querySelector("#best-difference-value"),
   bestScoreValue: document.querySelector("#best-score-value"),
   evalValue: document.querySelector("#eval-value"),
+  totalTimeValue: document.querySelector("#total-time-value"),
+  currentRunTimeValue: document.querySelector("#current-run-time-value"),
   statusValue: document.querySelector("#status-value"),
   targetDimensions: document.querySelector("#target-dimensions"),
   previewMeta: document.querySelector("#preview-meta"),
@@ -110,6 +112,57 @@ function formatRelativeAge(value) {
 
   const weeks = Math.floor(days / 7);
   return `${Math.max(weeks, 1)}w ago`;
+}
+
+function formatDurationCompact(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return "--";
+  }
+
+  const totalSeconds = Math.max(Math.round(value / 1000), 0);
+  const seconds = totalSeconds % 60;
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const minutes = totalMinutes % 60;
+  const totalHours = Math.floor(totalMinutes / 60);
+  const hours = totalHours % 24;
+  const days = Math.floor(totalHours / 24);
+
+  if (days > 0) {
+    return `${days}d ${hours}h`;
+  }
+
+  if (totalHours > 0) {
+    return `${totalHours}h ${minutes}m`;
+  }
+
+  if (totalMinutes > 0) {
+    return `${totalMinutes}m ${seconds}s`;
+  }
+
+  return `${totalSeconds}s`;
+}
+
+function formatSummaryTimestamp(value) {
+  const timestamp = new Date(value);
+  if (Number.isNaN(timestamp.getTime())) {
+    return "Waiting for first evaluation.";
+  }
+
+  const now = new Date();
+  const sameDay = timestamp.toDateString() === now.toDateString();
+  const formatted = sameDay
+    ? timestamp.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+      })
+    : timestamp.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+
+  return `Updated ${formatted}`;
 }
 
 function setLaunchStepState(element, nextState) {
@@ -636,6 +689,7 @@ function renderLaunch(appState) {
 function renderSummary(appState) {
   const report = appState.report;
   const runs = appState.history?.runs ?? [];
+  const target = appState.target;
   const currentScore = report?.score ?? null;
   const currentDifference = report?.difference ?? null;
   const baselineScore = runs.length ? runs[0].metric : currentScore;
@@ -654,6 +708,31 @@ function renderSummary(appState) {
   elements.bestScoreValue.textContent = bestScore > 0 ? formatMetric(bestScore, "%") : "--";
   elements.evalValue.textContent =
     typeof report?.evaluationMs === "number" ? `${report.evaluationMs}ms` : "--";
+
+  const latestRun = runs[runs.length - 1] ?? null;
+  const reportTimestamp = report ? new Date(report.generatedAt).getTime() : null;
+  const targetTimestamp = target ? new Date(target.updatedAt).getTime() : null;
+  const lastRunTimestamp = latestRun?.timestamp ?? null;
+  const lastRunMetric = latestRun?.metric ?? null;
+  const hasUnloggedCurrentRun =
+    typeof currentScore === "number" &&
+    typeof lastRunMetric === "number" &&
+    Math.abs(currentScore - lastRunMetric) > 0.0001;
+  const totalTimeMs =
+    targetTimestamp !== null && reportTimestamp !== null
+      ? Math.max(reportTimestamp - targetTimestamp, 0)
+      : targetTimestamp !== null
+        ? Math.max(Date.now() - targetTimestamp, 0)
+        : null;
+  const currentRunMs =
+    hasUnloggedCurrentRun && reportTimestamp !== null && lastRunTimestamp !== null
+      ? Math.max(reportTimestamp - lastRunTimestamp, 0)
+      : typeof report?.evaluationMs === "number"
+        ? report.evaluationMs
+        : null;
+
+  elements.totalTimeValue.textContent = formatDurationCompact(totalTimeMs);
+  elements.currentRunTimeValue.textContent = formatDurationCompact(currentRunMs);
 
   if (typeof currentScore === "number" && typeof baselineScore === "number") {
     const delta = Number((currentScore - baselineScore).toFixed(4));
@@ -675,7 +754,7 @@ function renderSummary(appState) {
   }
 
   elements.statusValue.textContent = report
-    ? `Latest evaluation: ${new Date(report.generatedAt).toLocaleString()}`
+    ? formatSummaryTimestamp(report.generatedAt)
     : "Waiting for first evaluation.";
 
   if (state.lastScore !== currentScore && currentScore !== null) {
