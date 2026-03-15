@@ -1,1 +1,153 @@
+<div id="app" class="dashboard"></div>
+<script>
+const sections = [
+  {
+    title: 'Claude Code',
+    accent: 'orange',
+    metrics: [
+      ['INPUT TOKENS', '1M'],
+      ['OUTPUT TOKENS', '96.3K'],
+      ['TOTAL TOKENS', '1.1M'],
+    ],
+    footer: [
+      ['MOST USED MODEL', 'claude-opus-4-5', '(1.02M)'],
+      ['RECENT USE (LAST 30 DAYS)', 'claude-opus-4-5', '(916K)'],
+      ['LONGEST STREAK', '2 days', ''],
+      ['CURRENT STREAK', '0 days', ''],
+    ],
+    note: 'Claude started logging full token telemetry on Nov 22; earlier activity may be undercounted.',
+    active: {
+      42: 2, 43: 1,
+      38: 1, 33: 1,
+      47: 4, 48: 2
+    }
+  },
+  {
+    title: 'Codex',
+    accent: 'blue',
+    metrics: [
+      ['INPUT TOKENS', '22.3B'],
+      ['OUTPUT TOKENS', '108M'],
+      ['TOTAL TOKENS', '22.5B'],
+    ],
+    footer: [
+      ['MOST USED MODEL', 'gpt-5-codex', '(16.2B)'],
+      ['RECENT USE (LAST 30 DAYS)', 'gpt-5.4', '(1.02B)'],
+      ['LONGEST STREAK', '22 days', ''],
+      ['CURRENT STREAK', '4 days', ''],
+    ],
+    active: (() => {
+      const map = {};
+      for (let c = 29; c <= 47; c++) {
+        map[c] = [1,2,3,4,5].includes((c - 29) % 6) ? 2 : 1;
+      }
+      [34,39,43].forEach(c => map[c] = 4);
+      [30,31,32,35,36,37,40,41,44,45].forEach(c => map[c] = 2);
+      [48,49,51,52].forEach(c => map[c] = 2);
+      map[50] = 1;
+      return map;
+    })()
+  },
+  {
+    title: 'Open Code',
+    accent: 'gray',
+    metrics: [
+      ['INPUT TOKENS', '6.32B'],
+      ['OUTPUT TOKENS', '34.1M'],
+      ['TOTAL TOKENS', '6.36B'],
+    ],
+    footer: [
+      ['MOST USED MODEL', 'gpt-5.2-codex', '(3.2B)'],
+      ['RECENT USE (LAST 30 DAYS)', 'gpt-5.3-codex', '(880M)'],
+      ['LONGEST STREAK', '26 days', ''],
+      ['CURRENT STREAK', '0 days', ''],
+    ],
+    active: (() => {
+      const map = {};
+      for (let c = 42; c <= 49; c++) map[c] = 2;
+      [44,47].forEach(c => map[c] = 3);
+      [45].forEach(c => map[c] = 4);
+      return map;
+    })()
+  }
+];
 
+const months = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+const app = document.getElementById('app');
+
+function buildHeatmap(section, idx) {
+  const wrap = document.createElement('section');
+  wrap.className = `section accent-${section.accent}`;
+
+  wrap.innerHTML = `
+    <div class="top">
+      <h2>${section.title}</h2>
+      <div class="stats">
+        ${section.metrics.map(([label, value]) => `
+          <div class="stat"><div class="label">${label}</div><div class="value">${value}</div></div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="months">${months.map(m => `<span>${m}</span>`).join('')}</div>
+    <div class="chart-wrap">
+      <div class="week-labels"><span>Mon</span><span>Sun</span></div>
+      <div class="grid"></div>
+    </div>
+    ${section.note ? `<div class="note">${section.note}</div>` : ''}
+    <div class="legend"><span>LESS</span><div class="chips"></div><span>MORE</span></div>
+    <div class="footer">
+      ${section.footer.map(([label, value, sub]) => `
+        <div class="foot-item">
+          <div class="label">${label}</div>
+          <div class="foot-value">${value} ${sub ? `<span>${sub}</span>` : ''}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  const grid = wrap.querySelector('.grid');
+  const rows = 7;
+  const cols = 50;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell lvl-0';
+      if (c === 0 && r < 1) cell.classList.add('offset');
+      if (c === 49 && r > 4 && idx > 0) cell.classList.add('cut');
+      const startRow = c < 1 ? 0 : (c < 39 ? 1 : 0);
+      if (r < startRow) cell.classList.add('blank');
+      const level = section.active[c];
+      if (!cell.classList.contains('blank') && level && r >= (rows - Math.min(rows, level + 1))) {
+        cell.className = `cell lvl-${Math.min(4, Math.max(1, level + ((r + c) % 3 === 0 ? 1 : 0)))}`;
+      }
+      if (section.title === 'Codex' && c >= 25 && c <= 48 && r >= 1 && r <= 5) {
+        const density = [0,1,2,3,4][(c * 5 + r * 3) % 5];
+        if ((c + r) % 4 !== 0) cell.className = `cell lvl-${Math.max(1, density)}`;
+      }
+      if (section.title === 'Open Code' && c >= 39 && c <= 48 && r >= 0 && r <= 5) {
+        const pattern = [1,2,3,4,2,1][(c + r) % 6];
+        if ((c + r) % 4 !== 1) cell.className = `cell lvl-${pattern}`;
+      }
+      if (section.title === 'Claude Code') {
+        const special = {
+          '36,5':1,'37,4':1,'39,3':1,'42,0':1,'42,1':1,'49,1':4,'49,2':2
+        };
+        const key = `${c},${r}`;
+        if (special[key]) cell.className = `cell lvl-${special[key]}`;
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  const chips = wrap.querySelector('.chips');
+  for (let i = 0; i < 5; i++) {
+    const chip = document.createElement('div');
+    chip.className = `chip lvl-${i}`;
+    chips.appendChild(chip);
+  }
+
+  return wrap;
+}
+
+sections.forEach((section, idx) => app.appendChild(buildHeatmap(section, idx)));
+</script>

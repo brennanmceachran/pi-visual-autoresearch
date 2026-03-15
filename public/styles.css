@@ -828,7 +828,7 @@ th,
   position: absolute;
   z-index: 2;
   pointer-events: none;
-  background: rgba(154, 83, 23, 0.28);
+  background: rgba(15, 123, 83, 0.22);
 }
 
 .compare-guide-x {
@@ -857,7 +857,7 @@ th,
   border: 2px solid var(--data-accent);
   border-radius: 999px;
   background: #fff;
-  box-shadow: 0 6px 14px rgba(17, 17, 17, 0.12);
+  box-shadow: 0 8px 18px rgba(17, 17, 17, 0.08);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -887,14 +887,14 @@ th,
   z-index: 2;
   padding: 0.24rem 0.54rem;
   border-radius: 999px;
-  border: 1px solid rgba(17, 17, 17, 0.08);
-  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(17, 17, 17, 0.06);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--text);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   pointer-events: none;
-  box-shadow: 0 4px 14px rgba(17, 17, 17, 0.06);
+  box-shadow: 0 6px 18px rgba(17, 17, 17, 0.05);
 }
 
 .compare-badge-base {
@@ -945,7 +945,7 @@ th,
   padding: 0.22rem 0.42rem;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: var(--surface-muted);
+  background: #fafafa;
   font-size: 0.74rem;
   white-space: nowrap;
 }
@@ -1005,7 +1005,7 @@ th,
   grid-column: 2;
   align-self: start;
   border-color: rgba(17, 17, 17, 0.08);
-  background: rgba(245, 245, 245, 0.9);
+  background: rgba(248, 248, 248, 0.96);
   color: rgba(17, 17, 17, 0.68);
 }
 
