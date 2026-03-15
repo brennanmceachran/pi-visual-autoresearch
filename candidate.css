@@ -32,14 +32,14 @@ body {
 }
 
 .section {
-  margin-bottom: calc(68px * var(--u));
+  margin-bottom: calc(69px * var(--u));
 }
 
 .top {
   display: grid;
   grid-template-columns: 1.37fr 1fr;
   align-items: start;
-  margin-bottom: calc(18px * var(--u));
+  margin-bottom: calc(17.5px * var(--u));
 }
 
 h2 {
@@ -54,7 +54,7 @@ h2 {
 .footer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: calc(18px * var(--u));
+  gap: calc(18.3px * var(--u));
 }
 
 .footer {
@@ -100,12 +100,12 @@ h2 {
 }
 
 .months {
-  margin-left: calc(42px * var(--u));
+  margin-left: calc(42.17px * var(--u));
   margin-bottom: calc(8px * var(--u));
   display: grid;
   grid-template-columns: repeat(13, 1fr);
   color: #6d7077;
-  font-size: calc(11px * var(--u));
+  font-size: calc(10.8px * var(--u));
 }
 
 .chart-wrap {
@@ -145,14 +145,14 @@ h2 {
   display: flex;
   align-items: center;
   gap: calc(8px * var(--u));
-  margin: calc(16px * var(--u)) 0 0 calc(42px * var(--u));
+  margin: calc(16px * var(--u)) 0 0 calc(42.17px * var(--u));
   color: #4b5563;
   font-size: calc(11px * var(--u));
 }
 
 .chips {
   display: flex;
-  gap: calc(4px * var(--u));
+  gap: calc(3.6px * var(--u));
 }
 
 .chip {
