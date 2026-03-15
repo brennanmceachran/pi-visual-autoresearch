@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readdirSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -6,6 +6,11 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const agentDir = resolve(root, ".pi", "agent");
 const sessionsDir = resolve(root, ".pi", "sessions");
+const extensionsDir = resolve(root, ".pi", "extensions");
+const extensionArgs = readdirSync(extensionsDir, { withFileTypes: true })
+  .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
+  .sort((left, right) => left.name.localeCompare(right.name))
+  .flatMap((entry) => ["--extension", resolve(extensionsDir, entry.name)]);
 
 mkdirSync(agentDir, { recursive: true });
 mkdirSync(sessionsDir, { recursive: true });
@@ -17,8 +22,7 @@ const args = [
   "--skill",
   resolve(root, ".pi", "skills"),
   "--no-extensions",
-  "--extension",
-  resolve(root, ".pi", "extensions", "pi-autoresearch.ts"),
+  ...extensionArgs,
   "--session-dir",
   sessionsDir,
   ...process.argv.slice(2)

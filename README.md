@@ -50,6 +50,22 @@ Or launch straight into the loop:
 pnpm research:agent
 ```
 
+When you are done with the local battleground server:
+
+```bash
+pnpm battleground:stop
+```
+
+## Reset
+
+To start a completely fresh battleground for a new target:
+
+```bash
+pnpm battleground:reset
+```
+
+This clears the uploaded target, resets `candidate.html` and `candidate.css` to blank, removes experiment history and artifacts, and wipes local Pi sessions for this repo.
+
 ## Notes
 
 - Pi is launched with `PI_CODING_AGENT_DIR` set to this repo's `.pi/agent`, and with `--no-skills` / `--no-extensions` so it does not pull in global user skills or extensions.

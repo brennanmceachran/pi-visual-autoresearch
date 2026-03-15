@@ -1,8 +1,12 @@
 const POLL_INTERVAL_MS = 4000;
 
 const state = {
+  appState: null,
   busy: false,
   requestInFlight: false,
+  diffView: "compare",
+  compareX: 58,
+  compareY: 44,
   lastScore: null,
   lastDifference: null,
   lastTargetKey: null,
@@ -13,8 +17,16 @@ const state = {
 const elements = {
   uploadForm: document.querySelector("#upload-form"),
   targetInput: document.querySelector("#target-input"),
+  selectedFile: document.querySelector("#selected-file"),
+  uploadButton: document.querySelector("#upload-button"),
   evaluateButton: document.querySelector("#evaluate-button"),
   headerState: document.querySelector("#header-state"),
+  targetCheckMeta: document.querySelector("#target-check-meta"),
+  piCheckMeta: document.querySelector("#pi-check-meta"),
+  skillCheckMeta: document.querySelector("#skill-check-meta"),
+  checkTarget: document.querySelector("#upload-form"),
+  checkPi: document.querySelector("#check-pi"),
+  checkSkill: document.querySelector("#check-skill"),
   scoreValue: document.querySelector("#score-value"),
   scoreDelta: document.querySelector("#score-delta"),
   differenceValue: document.querySelector("#difference-value"),
@@ -22,21 +34,22 @@ const elements = {
   bestScoreValue: document.querySelector("#best-score-value"),
   evalValue: document.querySelector("#eval-value"),
   statusValue: document.querySelector("#status-value"),
-  targetMeta: document.querySelector("#target-meta"),
   targetDimensions: document.querySelector("#target-dimensions"),
   previewMeta: document.querySelector("#preview-meta"),
-  captureMeta: document.querySelector("#capture-meta"),
   diffMeta: document.querySelector("#diff-meta"),
   feedback: document.querySelector("#feedback"),
   runCount: document.querySelector("#run-count"),
   targetImage: document.querySelector("#target-image"),
   targetPlaceholder: document.querySelector("#target-placeholder"),
-  candidateImage: document.querySelector("#candidate-image"),
-  candidatePlaceholder: document.querySelector("#candidate-placeholder"),
   diffImage: document.querySelector("#diff-image"),
   diffPlaceholder: document.querySelector("#diff-placeholder"),
   previewFrame: document.querySelector("#preview-frame"),
   previewPlaceholder: document.querySelector("#preview-placeholder"),
+  compareView: document.querySelector("#compare-view"),
+  compareStage: document.querySelector("#compare-stage"),
+  compareBaseImage: document.querySelector("#compare-base-image"),
+  compareOverlayImage: document.querySelector("#compare-overlay-image"),
+  diffToggleButtons: Array.from(document.querySelectorAll("[data-diff-view]")),
   historyBody: document.querySelector("#history-body"),
   historyName: document.querySelector("#history-name"),
   curvePath: document.querySelector("#curve-path"),
@@ -49,10 +62,13 @@ const elements = {
 function setBusy(nextBusy) {
   state.busy = nextBusy;
   elements.evaluateButton.disabled = nextBusy;
-  elements.uploadForm.querySelector("button").disabled = nextBusy;
-  elements.headerState.textContent = nextBusy
-    ? "Running evaluator"
-    : "Watching for new evaluations";
+  elements.uploadButton.disabled = nextBusy;
+
+  if (nextBusy) {
+    elements.headerState.textContent = "Running evaluator";
+  } else if (state.appState) {
+    renderLaunch(state.appState);
+  }
 }
 
 function setFeedback(message, isError = false) {
@@ -66,6 +82,55 @@ function formatMetric(value, suffix = "") {
   }
 
   return `${value.toFixed(4)}${suffix}`;
+}
+
+function formatRelativeAge(value) {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) {
+    return "No capture yet";
+  }
+
+  const elapsedMs = Date.now() - timestamp;
+  if (elapsedMs < 45_000) {
+    return "just now";
+  }
+
+  const minutes = Math.floor(elapsedMs / 60_000);
+  if (minutes < 60) {
+    return `${Math.max(minutes, 1)}m ago`;
+  }
+
+  const hours = Math.floor(elapsedMs / 3_600_000);
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
+
+  const days = Math.floor(elapsedMs / 86_400_000);
+  if (days < 7) {
+    return `${days}d ago`;
+  }
+
+  const weeks = Math.floor(days / 7);
+  return `${Math.max(weeks, 1)}w ago`;
+}
+
+function setLaunchStepState(element, nextState) {
+  element.classList.remove("is-done", "is-next");
+  if (nextState) {
+    element.classList.add(nextState);
+  }
+}
+
+function renderSelectedFileChip(appState = state.appState) {
+  const pendingFile = elements.targetInput.files?.[0];
+
+  if (pendingFile) {
+    elements.selectedFile.textContent = `queued: ${pendingFile.name}`;
+    elements.selectedFile.classList.remove("is-empty");
+    return;
+  }
+  elements.selectedFile.textContent = "";
+  elements.selectedFile.classList.add("is-empty");
 }
 
 function pulse(element) {
@@ -87,6 +152,41 @@ function setFrameVisibility(node, placeholder, src) {
   node.removeAttribute("src");
   node.style.visibility = "hidden";
   placeholder.classList.remove("hidden");
+}
+
+function setFrameAspect(target) {
+  const next = target ? String(target.width / target.height) : "0.8";
+  document.documentElement.style.setProperty("--frame-aspect", next);
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function setComparePosition(x, y) {
+  state.compareX = clamp(x, 0, 100);
+  state.compareY = clamp(y, 0, 100);
+  elements.compareStage.style.setProperty("--compare-x", state.compareX.toFixed(2));
+  elements.compareStage.style.setProperty("--compare-y", state.compareY.toFixed(2));
+}
+
+function updateCompareFromPointer(event) {
+  const rect = elements.compareStage.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+  setComparePosition(x, y);
+}
+
+function setDiffView(nextView) {
+  state.diffView = nextView;
+
+  for (const button of elements.diffToggleButtons) {
+    const active = button.dataset.diffView === nextView;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  }
 }
 
 function buildCurveValues(appState) {
@@ -125,8 +225,12 @@ function drawCurve(appState) {
   const right = 12;
   const top = 12;
   const bottom = 20;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  const hasVariation = rawMax - rawMin > 0.0001;
+  const padding = hasVariation ? Math.max((rawMax - rawMin) * 0.18, 0.25) : 1;
+  const min = rawMin - padding;
+  const max = rawMax + padding;
   const range = max - min || 1;
 
   const points = values.map((value, index) => {
@@ -138,20 +242,17 @@ function drawCurve(appState) {
     return { x, y, value, index };
   });
 
-  if (points.length === 1) {
-    points.push({
-      x: width - right,
-      y: points[0].y,
-      value: points[0].value,
-      index: 1
-    });
-  }
+  const pathData =
+    points.length > 1
+      ? points
+          .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+          .join(" ")
+      : "";
 
-  const pathData = points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
-    .join(" ");
-
-  const areaData = `${pathData} L ${points[points.length - 1].x.toFixed(2)} ${(height - bottom).toFixed(2)} L ${points[0].x.toFixed(2)} ${(height - bottom).toFixed(2)} Z`;
+  const areaData =
+    points.length > 1 && hasVariation
+      ? `${pathData} L ${points[points.length - 1].x.toFixed(2)} ${(height - bottom).toFixed(2)} L ${points[0].x.toFixed(2)} ${(height - bottom).toFixed(2)} Z`
+      : "";
 
   elements.curvePath.setAttribute("d", pathData);
   elements.curveArea.setAttribute("d", areaData);
@@ -181,9 +282,14 @@ function renderImages(appState, options = {}) {
   const targetKey = target ? `${target.fileName}:${target.updatedAt}` : null;
   const reportKey = report ? `${report.generatedAt}:${report.target.updatedAt}` : null;
   const cacheBust = `ts=${Date.now()}`;
+  const targetUrl = target?.url ? `${target.url}?${cacheBust}` : "";
+  const previewUrl = target ? `/api/preview?${cacheBust}` : "";
+  const candidateUrl = report?.artifacts?.candidate ? `${report.artifacts.candidate}?${cacheBust}` : "";
+  const diffUrl = report?.artifacts?.diff ? `${report.artifacts.diff}?${cacheBust}` : "";
+
+  setFrameAspect(target);
 
   if (options.force || state.lastTargetKey !== targetKey) {
-    const targetUrl = target?.url ? `${target.url}?${cacheBust}` : "";
     setFrameVisibility(elements.targetImage, elements.targetPlaceholder, targetUrl);
     elements.targetDimensions.textContent = target
       ? `${target.width}x${target.height}`
@@ -191,28 +297,55 @@ function renderImages(appState, options = {}) {
     state.lastTargetKey = targetKey;
   }
 
-  const previewUrl = target ? `/api/preview?${cacheBust}` : "";
   setFrameVisibility(elements.previewFrame, elements.previewPlaceholder, previewUrl);
 
   if (options.force || state.lastReportKey !== reportKey) {
-    const candidateUrl = report?.artifacts?.candidate
-      ? `${report.artifacts.candidate}?${cacheBust}`
-      : "";
-    const diffUrl = report?.artifacts?.diff ? `${report.artifacts.diff}?${cacheBust}` : "";
-    setFrameVisibility(elements.candidateImage, elements.candidatePlaceholder, candidateUrl);
-    setFrameVisibility(elements.diffImage, elements.diffPlaceholder, diffUrl);
+    if (targetUrl) {
+      elements.compareBaseImage.src = targetUrl;
+    } else {
+      elements.compareBaseImage.removeAttribute("src");
+    }
+
+    if (candidateUrl) {
+      elements.compareOverlayImage.src = candidateUrl;
+    } else {
+      elements.compareOverlayImage.removeAttribute("src");
+    }
+
+    if (diffUrl) {
+      elements.diffImage.src = diffUrl;
+    } else {
+      elements.diffImage.removeAttribute("src");
+    }
+
     state.lastReportKey = reportKey;
   }
 
+  const hasComparison = Boolean(targetUrl && candidateUrl);
+  const hasHeatmap = Boolean(diffUrl);
+  const showCompare = state.diffView === "compare";
+
+  elements.compareView.hidden = !showCompare || !hasComparison;
+  elements.diffImage.hidden = showCompare || !hasHeatmap;
+
+  if (showCompare) {
+    elements.diffPlaceholder.classList.toggle("hidden", hasComparison);
+    elements.diffPlaceholder.textContent = hasComparison
+      ? ""
+      : "Run the evaluator to compare the stored capture against the target.";
+  } else {
+    elements.diffPlaceholder.classList.toggle("hidden", hasHeatmap);
+    elements.diffPlaceholder.textContent = hasHeatmap
+      ? ""
+      : "Diff heatmap appears after the first evaluation.";
+  }
+
   elements.previewMeta.textContent = target
-    ? "Auto-refresh every 4s"
+    ? "Locked to target frame"
     : "Preview available after target upload";
-  elements.captureMeta.textContent = report
-    ? `Captured ${new Date(report.generatedAt).toLocaleTimeString()}`
-    : "Last evaluated frame";
   elements.diffMeta.textContent = report
-    ? `Background rgb(${report.detectedBackgroundColor.r}, ${report.detectedBackgroundColor.g}, ${report.detectedBackgroundColor.b})`
-    : "Misses should shrink over time";
+    ? formatRelativeAge(report.generatedAt)
+    : "No capture yet";
 }
 
 function renderHistory(appState) {
@@ -249,6 +382,36 @@ function renderHistory(appState) {
     .join("");
 }
 
+function renderLaunch(appState) {
+  const target = appState.target;
+  const hasTarget = Boolean(target);
+  const hasReport = Boolean(appState.report);
+
+  setLaunchStepState(elements.checkTarget, hasTarget ? "is-done" : "is-next");
+  setLaunchStepState(elements.checkPi, hasTarget ? "is-next" : "");
+  setLaunchStepState(elements.checkSkill, hasTarget ? "is-next" : "");
+
+  elements.targetCheckMeta.textContent = hasTarget
+    ? `${target.originalName} · ${target.width}x${target.height}`
+    : "No target loaded";
+  elements.piCheckMeta.textContent = hasTarget
+    ? "pnpm pi"
+    : "waiting for target";
+  elements.skillCheckMeta.textContent = hasTarget
+    ? "/skill:visual-diff-autoresearch"
+    : "waiting for Pi";
+  elements.uploadButton.textContent = hasTarget
+    ? "Replace target"
+    : "Upload target";
+  renderSelectedFileChip(appState);
+
+  elements.headerState.textContent = hasTarget
+    ? hasReport
+      ? "Target locked. Pi can iterate while you watch the diff fall."
+      : "Target loaded. Start Pi, then run the local skill."
+    : "Load a target to start a new battleground session.";
+}
+
 function renderSummary(appState) {
   const report = appState.report;
   const runs = appState.history?.runs ?? [];
@@ -270,9 +433,6 @@ function renderSummary(appState) {
   elements.bestScoreValue.textContent = bestScore > 0 ? formatMetric(bestScore, "%") : "--";
   elements.evalValue.textContent =
     typeof report?.evaluationMs === "number" ? `${report.evaluationMs}ms` : "--";
-  elements.targetMeta.textContent = appState.target
-    ? `${appState.target.originalName} · ${appState.target.width}x${appState.target.height}`
-    : "No target loaded";
 
   if (typeof currentScore === "number" && typeof baselineScore === "number") {
     const delta = Number((currentScore - baselineScore).toFixed(4));
@@ -311,6 +471,8 @@ function renderSummary(appState) {
 }
 
 function renderState(appState, options = {}) {
+  state.appState = appState;
+  renderLaunch(appState);
   renderSummary(appState);
   renderImages(appState, options);
   renderHistory(appState);
@@ -369,11 +531,16 @@ elements.uploadForm.addEventListener("submit", async (event) => {
     renderState(payload.state, { force: true });
     setFeedback("Target uploaded and score refreshed.");
     elements.targetInput.value = "";
+    renderSelectedFileChip(payload.state);
   } catch (error) {
     setFeedback(error instanceof Error ? error.message : String(error), true);
   } finally {
     setBusy(false);
   }
+});
+
+elements.targetInput.addEventListener("change", () => {
+  renderSelectedFileChip();
 });
 
 elements.evaluateButton.addEventListener("click", async () => {
@@ -396,6 +563,40 @@ elements.evaluateButton.addEventListener("click", async () => {
   }
 });
 
+for (const button of elements.diffToggleButtons) {
+  button.addEventListener("click", () => {
+    setDiffView(button.dataset.diffView || "compare");
+    if (state.appState) {
+      renderImages(state.appState, { force: true });
+    }
+  });
+}
+
+elements.compareStage.addEventListener("pointerdown", (event) => {
+  updateCompareFromPointer(event);
+  elements.compareStage.setPointerCapture(event.pointerId);
+});
+
+elements.compareStage.addEventListener("pointermove", (event) => {
+  if (!elements.compareStage.hasPointerCapture(event.pointerId)) {
+    return;
+  }
+
+  updateCompareFromPointer(event);
+});
+
+elements.compareStage.addEventListener("pointerup", (event) => {
+  if (elements.compareStage.hasPointerCapture(event.pointerId)) {
+    elements.compareStage.releasePointerCapture(event.pointerId);
+  }
+});
+
+elements.compareStage.addEventListener("pointercancel", (event) => {
+  if (elements.compareStage.hasPointerCapture(event.pointerId)) {
+    elements.compareStage.releasePointerCapture(event.pointerId);
+  }
+});
+
 state.pollTimer = window.setInterval(() => {
   if (document.hidden || state.busy) {
     return;
@@ -403,6 +604,9 @@ state.pollTimer = window.setInterval(() => {
 
   refreshState({ silent: true });
 }, POLL_INTERVAL_MS);
+
+setDiffView(state.diffView);
+setComparePosition(state.compareX, state.compareY);
 
 refreshState({ force: true }).catch((error) => {
   setFeedback(error instanceof Error ? error.message : String(error), true);

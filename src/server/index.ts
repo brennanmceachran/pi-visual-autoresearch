@@ -75,7 +75,7 @@ app.get("/api/target/current", async (_request, response) => {
   }
 
   response.type(target.contentType);
-  response.sendFile(target.absolutePath);
+  response.sendFile(target.absolutePath, { dotfiles: "allow" });
 });
 
 app.get("/api/preview", async (_request, response) => {

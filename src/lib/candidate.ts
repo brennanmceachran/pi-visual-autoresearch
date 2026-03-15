@@ -153,6 +153,7 @@ export function buildPreviewDocument(input: {
         color-scheme: light;
         --stage-width: ${stage.width}px;
         --stage-height: ${stage.height}px;
+        --preview-scale: 1;
       }
 
       * {
@@ -162,7 +163,8 @@ export function buildPreviewDocument(input: {
       html,
       body {
         margin: 0;
-        min-height: 100%;
+        width: 100%;
+        height: 100%;
         background:
           linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 238, 227, 0.92)),
           radial-gradient(circle at top right, rgba(255, 160, 55, 0.22), transparent 38%);
@@ -172,22 +174,36 @@ export function buildPreviewDocument(input: {
       body {
         display: grid;
         place-items: center;
-        padding: 32px;
+        overflow: hidden;
       }
 
-      .stage-shell {
+      .preview-viewport {
         display: grid;
         place-items: center;
-        min-width: calc(var(--stage-width) + 64px);
-        min-height: calc(var(--stage-height) + 64px);
-        border: 1px solid rgba(33, 24, 13, 0.12);
-        border-radius: 32px;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 244, 236, 0.86)),
-          linear-gradient(90deg, rgba(28, 21, 12, 0.05) 1px, transparent 1px),
-          linear-gradient(rgba(28, 21, 12, 0.05) 1px, transparent 1px);
-        background-size: auto, 24px 24px, 24px 24px;
-        box-shadow: 0 28px 90px rgba(46, 28, 5, 0.18);
+        width: 100%;
+        height: 100%;
+        padding: 18px;
+      }
+
+      .preview-frame {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: calc(var(--stage-width) * var(--preview-scale));
+        height: calc(var(--stage-height) * var(--preview-scale));
+        max-width: 100%;
+        max-height: 100%;
+        overflow: hidden;
+      }
+
+      .preview-scaler {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: var(--stage-width);
+        height: var(--stage-height);
+        transform: translate(-50%, -50%) scale(var(--preview-scale));
+        transform-origin: center center;
       }
 
       #candidate-root {
@@ -196,16 +212,42 @@ export function buildPreviewDocument(input: {
         height: var(--stage-height);
         overflow: hidden;
         isolation: isolate;
-        background: transparent;
+        border: 1px solid rgba(33, 24, 13, 0.12);
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 244, 236, 0.9)),
+          linear-gradient(90deg, rgba(28, 21, 12, 0.04) 1px, transparent 1px),
+          linear-gradient(rgba(28, 21, 12, 0.04) 1px, transparent 1px);
+        background-size: auto, 24px 24px, 24px 24px;
+        box-shadow: 0 28px 90px rgba(46, 28, 5, 0.18);
       }
 
 ${compiledCss}
     </style>
   </head>
   <body>
-    <div class="stage-shell">
-      <div id="candidate-root">${candidateHtml}</div>
+    <div class="preview-viewport">
+      <div class="preview-frame">
+        <div class="preview-scaler">
+          <div id="candidate-root">${candidateHtml}</div>
+        </div>
+      </div>
     </div>
+    <script>
+      const stageWidth = ${stage.width};
+      const stageHeight = ${stage.height};
+      const chromePadding = 36;
+
+      function updatePreviewScale() {
+        const availableWidth = Math.max(window.innerWidth - chromePadding, 1);
+        const availableHeight = Math.max(window.innerHeight - chromePadding, 1);
+        const scale = Math.min(availableWidth / stageWidth, availableHeight / stageHeight, 1);
+        document.documentElement.style.setProperty("--preview-scale", String(scale));
+      }
+
+      window.addEventListener("resize", updatePreviewScale, { passive: true });
+      updatePreviewScale();
+    </script>
   </body>
 </html>`;
 }

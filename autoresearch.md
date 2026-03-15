@@ -1,27 +1,15 @@
-# Autoresearch: Visual diff battleground
+# Visual Diff Autoresearch
 
-## Target
-- File: `data/targets/current.png`
-- Original name: `heatmap-last-year.png`
-- Size: `4000x5014`
+Target: `heatmap-last-year.png` (`4000×5014`)
 
-## Objective
-Increase the `similarity` score from `pnpm research:score`.
+Goal: maximize `similarity` from `pnpm research:score` by editing only:
 
-## Constraints
-- Edit only `candidate.html` and `candidate.css`
-- Do not modify `data/targets/` or `.artifacts/`
-- Keep the output deterministic and frame-filling
+- `candidate.html`
+- `candidate.css`
 
-## Initial observations
-- The target is a light dashboard-style page on an off-white background.
-- It contains three stacked sections: Claude Code, Codex, and Open Code.
-- Each section has a title, a compact stat row on the right, a 7-row heatmap, a legend, and summary stats below.
-- The current candidate is a dark centered card and is far from the target.
+Working hypothesis:
 
-## Plan
-1. Record the baseline score.
-2. Rebuild the overall layout with a light background and three repeated sections.
-3. Approximate the heatmaps using dense rounded square grids.
-4. Tune spacing, typography, and the colored active cells.
-5. Iterate on alignment and density based on diff output.
+- Reconstruct the dark dashboard with three stacked sections.
+- Match the repeated rounded-square heatmap grids.
+- Approximate typography, spacing, legends, and highlighted cells.
+- Iterate from coarse layout to finer color/detail fixes.

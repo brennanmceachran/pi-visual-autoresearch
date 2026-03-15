@@ -10,8 +10,10 @@
   "scripts": {
     "dev": "tsx watch src/server/index.ts",
     "battleground": "tsx src/server/index.ts",
+    "battleground:stop": "node scripts/battleground-stop.mjs",
     "pi": "node scripts/pi-local.mjs",
     "research:agent": "node scripts/pi-local.mjs \"Use the visual-diff-autoresearch skill to optimize the current target image in this repository.\"",
+    "battleground:reset": "node scripts/battleground-reset.mjs",
     "research:score": "tsx src/research/score.ts",
     "typecheck": "tsc --noEmit"
   },

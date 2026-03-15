@@ -1,9 +1,13 @@
 import { readdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { join } from "node:path";
 
 import { imageSize } from "image-size";
 
-import { TARGET_MANIFEST_PATH, TARGETS_DIR, ensureRuntimeDirs } from "./paths.js";
+import {
+  PRIVATE_TARGETS_DIR,
+  TARGET_INFO_PATH,
+  ensureRuntimeDirs
+} from "./paths.js";
 
 const MIME_EXTENSION: Record<string, string> = {
   "image/gif": "gif",
@@ -53,21 +57,21 @@ function getExtension(file: Express.Multer.File) {
 }
 
 async function removeOldTargetFiles() {
-  const files = await readdir(TARGETS_DIR);
+  const files = await readdir(PRIVATE_TARGETS_DIR);
 
   await Promise.all(
     files
-      .filter((file) => file !== ".gitkeep" && file !== basename(TARGET_MANIFEST_PATH))
-      .map((file) => unlink(join(TARGETS_DIR, file)))
+      .filter((file) => file !== ".gitkeep")
+      .map((file) => unlink(join(PRIVATE_TARGETS_DIR, file)))
   );
 }
 
 export async function readCurrentTarget(): Promise<TargetState | null> {
   try {
-    const manifest = JSON.parse(await readFile(TARGET_MANIFEST_PATH, "utf8")) as TargetManifest;
+    const manifest = JSON.parse(await readFile(TARGET_INFO_PATH, "utf8")) as TargetManifest;
     return {
       ...manifest,
-      absolutePath: join(TARGETS_DIR, manifest.fileName)
+      absolutePath: join(PRIVATE_TARGETS_DIR, manifest.fileName)
     };
   } catch {
     return null;
@@ -87,7 +91,7 @@ export async function saveUploadedTarget(file: Express.Multer.File): Promise<Tar
   await removeOldTargetFiles();
 
   const fileName = `current.${extension}`;
-  const absolutePath = join(TARGETS_DIR, fileName);
+  const absolutePath = join(PRIVATE_TARGETS_DIR, fileName);
   const manifest: TargetManifest = {
     contentType: file.mimetype || `image/${extension}`,
     fileName,
@@ -98,7 +102,7 @@ export async function saveUploadedTarget(file: Express.Multer.File): Promise<Tar
   };
 
   await writeFile(absolutePath, file.buffer);
-  await writeFile(TARGET_MANIFEST_PATH, JSON.stringify(manifest, null, 2));
+  await writeFile(TARGET_INFO_PATH, JSON.stringify(manifest, null, 2));
 
   return {
     ...manifest,
@@ -108,9 +112,14 @@ export async function saveUploadedTarget(file: Express.Multer.File): Promise<Tar
 
 export async function clearTargetArtifacts() {
   try {
-    await rm(TARGET_MANIFEST_PATH);
+    await rm(TARGET_INFO_PATH);
   } catch {
     // Ignore missing manifest.
   }
-}
 
+  try {
+    await removeOldTargetFiles();
+  } catch {
+    // Ignore missing files.
+  }
+}

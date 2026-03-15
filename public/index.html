@@ -17,167 +17,219 @@
   </head>
   <body>
     <div class="app">
-      <header class="topbar">
-        <div class="brand">
-          <strong>Pi Visual Autoresearch</strong>
-          <span id="header-state">Watching for new evaluations</span>
+      <section class="panel launch-shell">
+        <div class="launch-masthead">
+          <div class="launch-copy">
+            <div class="launch-eyebrow">Pi Visual Autoresearch</div>
+            <div class="launch-title">Visual Diff Battleground</div>
+          </div>
+          <p id="header-state" class="launch-description">
+            The server is live. Add a target, start Pi, and run the local skill to begin the loop.
+          </p>
         </div>
 
-        <div class="topbar-meta">
-          <div class="meta-pair">
-            <span>Target</span>
-            <strong id="target-meta">No target loaded</strong>
+        <div class="launch-deck" aria-label="Session readiness">
+          <div class="launch-slot launch-slot-static is-done" id="check-server">
+            <span class="launch-step-icon" aria-hidden="true"></span>
+            <div class="launch-slot-copy">
+              <span class="launch-step-label">Server</span>
+              <span class="launch-step-meta">127.0.0.1:4242</span>
+            </div>
           </div>
-          <div class="meta-pair">
-            <span>Surface</span>
-            <strong><code>candidate.html</code> <code>candidate.css</code></strong>
+
+          <form id="upload-form" class="launch-slot launch-slot-target" aria-label="Target setup">
+            <label class="sr-only" for="target-input">Target image</label>
+            <input id="target-input" class="launch-file-input" name="target" type="file" accept="image/*" />
+
+            <div class="launch-target-copy">
+              <div class="launch-slot-copy">
+                <span class="launch-step-icon" aria-hidden="true"></span>
+                <div class="launch-slot-text">
+                  <span class="launch-step-label">Target</span>
+                  <span id="target-check-meta" class="launch-step-meta">No target loaded</span>
+                </div>
+              </div>
+              <span id="selected-file" class="launch-selection is-empty">No replacement selected</span>
+            </div>
+            <div class="launch-target-controls">
+              <label for="target-input" class="launch-link-control">Select</label>
+              <button id="upload-button" class="action launch-button" type="submit">Upload target</button>
+            </div>
+          </form>
+
+          <div class="launch-slot launch-slot-static" id="check-pi">
+            <span class="launch-step-icon" aria-hidden="true"></span>
+            <div class="launch-slot-copy">
+              <span class="launch-step-label">Pi</span>
+              <span id="pi-check-meta" class="launch-step-meta">after target upload</span>
+            </div>
+          </div>
+
+          <div class="launch-slot launch-slot-static" id="check-skill">
+            <span class="launch-step-icon" aria-hidden="true"></span>
+            <div class="launch-slot-copy">
+              <span class="launch-step-label">Skill</span>
+              <span id="skill-check-meta" class="launch-step-meta">after Pi starts</span>
+            </div>
           </div>
         </div>
-      </header>
+
+        <p id="feedback" class="feedback launch-feedback"></p>
+      </section>
 
       <div class="workspace">
         <main class="main-column">
-          <section class="panel summary-panel">
-            <div class="score-block">
-              <div class="summary-label">Current match</div>
-              <div class="score-line">
-                <strong id="score-value">--</strong>
-                <span class="summary-unit">%</span>
-              </div>
-              <div class="summary-caption">Similarity to the active target</div>
-              <div id="score-delta" class="score-delta">Upload a target to start the run.</div>
-              <div id="status-value" class="status-line">Waiting for first evaluation.</div>
-            </div>
-
-            <div class="curve-block">
-              <div class="panel-head">
-                <div>
-                  <h2>Diff curve</h2>
-                  <p>Lower is better. The line should fall as the agent learns.</p>
+          <div class="panel evaluation-shell">
+            <section class="summary-panel">
+              <div class="summary-rail">
+                <div class="score-block">
+                  <div class="summary-label">Current match</div>
+                  <div class="score-line">
+                    <strong id="score-value">--</strong>
+                    <span class="summary-unit">%</span>
+                  </div>
+                  <div class="summary-caption">Similarity to the active target</div>
+                  <div id="score-delta" class="score-delta">Upload a target to start the run.</div>
+                  <div id="status-value" class="status-line">Waiting for first evaluation.</div>
                 </div>
 
-                <div class="mini-stats">
-                  <div>
-                    <span>Current</span>
+                <div class="summary-metrics">
+                  <div class="metric-tile">
+                    <span>Current diff</span>
                     <strong id="difference-value">--</strong>
                   </div>
-                  <div>
-                    <span>Best</span>
+                  <div class="metric-tile">
+                    <span>Best diff</span>
                     <strong id="best-difference-value">--</strong>
                   </div>
-                  <div>
+                  <div class="metric-tile">
                     <span>Eval</span>
                     <strong id="eval-value">--</strong>
                   </div>
                 </div>
               </div>
 
-              <div class="curve-shell">
-                <svg id="curve-svg" viewBox="0 0 420 180" preserveAspectRatio="none">
-                  <path id="curve-area" class="curve-area" d=""></path>
-                  <path id="curve-path" class="curve-path" d=""></path>
-                  <g id="curve-points"></g>
-                </svg>
-                <div class="curve-axis">
-                  <span id="curve-start-label">Run 1</span>
-                  <span id="curve-end-label">Latest</span>
+              <div class="curve-block">
+                <div class="curve-head">
+                  <div>
+                    <h2>Diff curve</h2>
+                    <p>Lower is better. The line should fall as the agent learns.</p>
+                  </div>
+                </div>
+
+                <div class="curve-shell">
+                  <svg id="curve-svg" viewBox="0 0 420 180" preserveAspectRatio="none">
+                    <path id="curve-area" class="curve-area" d=""></path>
+                    <path id="curve-path" class="curve-path" d=""></path>
+                    <g id="curve-points"></g>
+                  </svg>
+                  <div class="curve-axis">
+                    <span id="curve-start-label">Run 1</span>
+                    <span id="curve-end-label">Latest</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="panel arena-panel">
-            <div class="panel-head arena-head">
-              <div>
-                <h2>Watch window</h2>
-                <p>Target, live DOM, scored capture, and diff update as new evaluations land.</p>
+            <section class="arena-panel">
+              <div class="inspection-shell">
+                <article class="inspection-column">
+                  <div class="inspection-head">
+                    <div class="inspection-copy">
+                      <h3>Target</h3>
+                      <span id="target-dimensions">No target</span>
+                    </div>
+                  </div>
+                  <div class="inspection-viewport">
+                    <img id="target-image" alt="Target visual" />
+                    <div id="target-placeholder" class="frame-empty">Upload a target image.</div>
+                  </div>
+                </article>
+
+                <article class="inspection-column">
+                  <div class="inspection-head">
+                    <div class="inspection-copy">
+                      <h3>Live candidate</h3>
+                      <span id="preview-meta">Scaled to target frame</span>
+                    </div>
+                  </div>
+                  <div class="inspection-viewport">
+                    <iframe id="preview-frame" title="Candidate preview"></iframe>
+                    <div id="preview-placeholder" class="frame-empty">Preview available after the first target is loaded.</div>
+                  </div>
+                </article>
+
+                <article class="inspection-column inspection-column-diff">
+                  <div class="inspection-head inspection-head-diff">
+                    <div class="inspection-copy">
+                      <div class="inspection-title-row">
+                        <h3>Diff inspector</h3>
+                        <div class="view-toggle" role="group" aria-label="Diff view mode">
+                          <button
+                            id="compare-toggle"
+                            class="toggle-chip is-active"
+                            type="button"
+                            data-diff-view="compare"
+                            aria-pressed="true"
+                          >
+                            Compare
+                          </button>
+                          <button
+                            id="heatmap-toggle"
+                            class="toggle-chip"
+                            type="button"
+                            data-diff-view="heatmap"
+                            aria-pressed="false"
+                          >
+                            Heatmap
+                          </button>
+                        </div>
+                      </div>
+                      <div class="inspection-meta-row">
+                        <span id="diff-meta">No capture yet</span>
+                        <button
+                          id="evaluate-button"
+                          class="refresh-action"
+                          type="button"
+                          aria-label="Run evaluation now"
+                        >
+                          (refresh)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="inspection-viewport inspection-viewport-compare">
+                    <div id="compare-view" class="compare-view">
+                      <div id="compare-stage" class="compare-stage">
+                        <img
+                          id="compare-base-image"
+                          class="compare-image compare-image-base"
+                          alt="Target reference"
+                        />
+                        <div id="compare-overlay" class="compare-overlay">
+                          <img
+                            id="compare-overlay-image"
+                            class="compare-image compare-image-overlay"
+                            alt="Stored candidate capture"
+                          />
+                        </div>
+                        <div class="compare-guide compare-guide-x"></div>
+                        <div class="compare-guide compare-guide-y"></div>
+                        <div class="compare-handle" aria-hidden="true"></div>
+                        <div class="compare-badge compare-badge-base">Target</div>
+                        <div class="compare-badge compare-badge-overlay">Capture</div>
+                      </div>
+                    </div>
+                    <img id="diff-image" class="diff-view-media" alt="Visual diff heatmap" hidden />
+                    <div id="diff-placeholder" class="frame-empty">Run the evaluator to inspect the diff.</div>
+                  </div>
+                </article>
               </div>
-              <button id="evaluate-button" class="action action-secondary" type="button">
-                Evaluate now
-              </button>
-            </div>
-
-            <div class="frame-grid">
-              <article class="frame-card">
-                <div class="frame-bar">
-                  <h3>Target</h3>
-                  <span id="target-dimensions">No target</span>
-                </div>
-                <div class="frame-box">
-                  <img id="target-image" alt="Target visual" />
-                  <div id="target-placeholder" class="frame-empty">Upload a target image.</div>
-                </div>
-              </article>
-
-              <article class="frame-card">
-                <div class="frame-bar">
-                  <h3>Scored capture</h3>
-                  <span id="capture-meta">Last evaluated frame</span>
-                </div>
-                <div class="frame-box">
-                  <img id="candidate-image" alt="Candidate capture" />
-                  <div id="candidate-placeholder" class="frame-empty">Run the evaluator to generate a scored capture.</div>
-                </div>
-              </article>
-
-              <article class="frame-card">
-                <div class="frame-bar">
-                  <h3>Diff heatmap</h3>
-                  <span id="diff-meta">Misses should shrink over time</span>
-                </div>
-                <div class="frame-box">
-                  <img id="diff-image" alt="Visual diff heatmap" />
-                  <div id="diff-placeholder" class="frame-empty">Diff output appears after the first evaluation.</div>
-                </div>
-              </article>
-
-              <article class="frame-card frame-card-wide">
-                <div class="frame-bar">
-                  <h3>Live candidate DOM</h3>
-                  <span id="preview-meta">Refreshes while you watch</span>
-                </div>
-                <div class="frame-box">
-                  <iframe id="preview-frame" title="Candidate preview"></iframe>
-                  <div id="preview-placeholder" class="frame-empty">Preview available after the first target is loaded.</div>
-                </div>
-              </article>
-            </div>
-          </section>
+            </section>
+          </div>
         </main>
 
         <aside class="sidebar">
-          <section class="panel upload-panel">
-            <div class="panel-head panel-head-compact">
-              <div>
-                <h2>Target input</h2>
-                <p>Replace the active frame and rerun the evaluator.</p>
-              </div>
-            </div>
-
-            <form id="upload-form" class="upload-form">
-              <label class="field-label" for="target-input">Image file</label>
-              <input id="target-input" name="target" type="file" accept="image/*" />
-              <button class="action" type="submit">Upload and score</button>
-            </form>
-
-            <div class="command-list">
-              <div class="command-row">
-                <span>Server</span>
-                <code>pnpm battleground</code>
-              </div>
-              <div class="command-row">
-                <span>Pi</span>
-                <code>pnpm pi</code>
-              </div>
-              <div class="command-row">
-                <span>Skill</span>
-                <code>/skill:visual-diff-autoresearch</code>
-              </div>
-            </div>
-
-            <p id="feedback" class="feedback"></p>
-          </section>
-
           <section class="panel history-panel">
             <div class="panel-head panel-head-compact">
               <div>

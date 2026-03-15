@@ -3,9 +3,9 @@ node_modules
 !.artifacts/latest/
 .artifacts/latest/*
 !.artifacts/latest/.gitkeep
-data/targets/*
-!data/targets/.gitkeep
+data/target.json
 .pi/agent/
+.pi/private/
 .pi/sessions/
 playwright-report/
 test-results/
