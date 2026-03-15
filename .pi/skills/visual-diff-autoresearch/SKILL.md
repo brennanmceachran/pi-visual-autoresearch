@@ -16,7 +16,7 @@ Improve the visual similarity score reported by `pnpm research:score` for the cu
 - `candidate.html`
 - `candidate.css`
 
-Do not edit files in `data/targets/` or `.artifacts/` unless the user explicitly asks for changes to the battleground itself.
+Do not inspect or edit private battleground paths such as `.pi/private/targets/`, `.pi/sessions/`, `data/target.json`, or `.artifacts/` unless the user explicitly asks for changes to the battleground itself.
 
 ## Workflow
 
@@ -24,8 +24,6 @@ Do not edit files in `data/targets/` or `.artifacts/` unless the user explicitly
    - `AGENTS.md`
    - `candidate.html`
    - `candidate.css`
-   - `data/targets/current.json`
-   - `.artifacts/latest/report.json` if it exists
 2. If there is no git branch for the run yet, create one:
    - `git checkout -b autoresearch/visual-diff-$(date +%Y%m%d-%H%M%S)`
 3. Write or refresh:
@@ -39,6 +37,7 @@ Do not edit files in `data/targets/` or `.artifacts/` unless the user explicitly
      - `direction`: `higher`
 5. Run the baseline:
    - `run_experiment` with `pnpm research:score`
+   - use the attached scorer images in the `run_experiment` result instead of reading `.artifacts/latest/*.png`
 6. Parse the `METRIC name=value` lines from stdout and call `log_experiment`.
 
 ## Metrics
@@ -64,6 +63,7 @@ Do not edit files in `data/targets/` or `.artifacts/` unless the user explicitly
 - Never cheat by embedding or fetching the target pixels. No `data:` URIs, no `<img>`, `<picture>`, `<canvas>`, `<iframe>`, `<script>`, `<object>`, no `src`/`srcset`/`poster`, and no CSS `url(...)` values except fragment-only references like `url(#mask)`.
 - Stay inside honest reconstruction primitives: DOM layout, Tailwind utilities, custom CSS, and inline SVG vector shapes.
 - If the evaluator reports a validation failure, remove the forbidden construct and continue with an honest approximation.
+- If visual feedback is missing from `run_experiment`, do not read the artifact images directly. Treat it as a battleground bug and continue only after that bug is fixed.
 
 ## autoresearch.sh
 

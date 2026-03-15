@@ -4,14 +4,13 @@ import {
   ARTIFACTS_DIR,
   CANDIDATE_CSS_PATH,
   CANDIDATE_HTML_PATH,
-  REPORT_PATH,
   ROOT_DIR,
   SESSIONS_DIR,
   TARGET_INFO_PATH,
   PRIVATE_TARGETS_DIR
 } from "./paths.js";
 
-const SAFE_READ_PATHS = new Set([TARGET_INFO_PATH, REPORT_PATH]);
+const PROTECTED_PATHS = new Map([[TARGET_INFO_PATH, "target metadata"]]);
 const WRITABLE_PATHS = new Set([
   CANDIDATE_HTML_PATH,
   CANDIDATE_CSS_PATH,
@@ -49,7 +48,10 @@ export function getWritablePathReason(absolutePath: string) {
 }
 
 export function getProtectedPathReason(absolutePath: string) {
-  if (SAFE_READ_PATHS.has(absolutePath)) return null;
+  const protectedPathReason = PROTECTED_PATHS.get(absolutePath);
+  if (protectedPathReason) {
+    return protectedPathReason;
+  }
 
   for (const directory of PROTECTED_DIRECTORIES) {
     if (isWithin(directory.path, absolutePath)) {
@@ -61,8 +63,13 @@ export function getProtectedPathReason(absolutePath: string) {
 }
 
 export function pathMayTraverseProtected(absolutePath: string) {
-  return PROTECTED_DIRECTORIES.some((directory) =>
-    isWithin(absolutePath, directory.path)
+  return (
+    PROTECTED_DIRECTORIES.some((directory) =>
+      isWithin(absolutePath, directory.path)
+    ) ||
+    [...PROTECTED_PATHS.keys()].some((protectedPath) =>
+      isWithin(absolutePath, protectedPath)
+    )
   );
 }
 

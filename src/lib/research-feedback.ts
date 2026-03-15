@@ -2,7 +2,7 @@ import type { ImageContent, TextContent } from "@mariozechner/pi-ai";
 import {
   formatDimensionNote,
   resizeImage
-} from "@mariozechner/pi-coding-agent/dist/utils/image-resize.js";
+} from "../../node_modules/@mariozechner/pi-coding-agent/dist/utils/image-resize.js";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -15,17 +15,18 @@ async function makeImageBlock(input: {
   mimeType: string;
 }): Promise<(TextContent | ImageContent)[]> {
   const buffer = await readFile(input.absolutePath);
+  const base64 = buffer.toString("base64");
   const resized = await resizeImage(
     {
       type: "image",
-      data: buffer.toString("base64"),
+      data: base64,
       mimeType: input.mimeType
     },
     {
-      maxWidth: 1024,
-      maxHeight: 1024,
-      maxBytes: 180_000,
-      jpegQuality: 80
+      maxWidth: 1400,
+      maxHeight: 1400,
+      maxBytes: 300_000,
+      jpegQuality: 76
     }
   );
 

@@ -27,6 +27,31 @@ function block(reason: string) {
   };
 }
 
+function appendToolResultNote(
+  content: { type: "text"; text: string }[] | unknown[],
+  note: string
+) {
+  const nextContent = [...content];
+  const firstBlock = nextContent[0];
+
+  if (
+    firstBlock &&
+    typeof firstBlock === "object" &&
+    "type" in firstBlock &&
+    firstBlock.type === "text" &&
+    "text" in firstBlock &&
+    typeof firstBlock.text === "string"
+  ) {
+    nextContent[0] = {
+      ...firstBlock,
+      text: `${firstBlock.text}\n\n${note}`
+    };
+    return nextContent;
+  }
+
+  return [{ type: "text", text: note }, ...nextContent];
+}
+
 export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
   pi.on("session_start", async () => {
     applyActiveTools(pi);
@@ -101,10 +126,22 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
       if (!feedbackBlocks) return;
 
       return {
-        content: [...event.content, ...feedbackBlocks]
+        content: [
+          ...appendToolResultNote(
+            event.content,
+            "Scorer images attached below: target, candidate capture, and diff heatmap."
+          ),
+          ...feedbackBlocks
+        ]
       };
-    } catch {
-      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        content: appendToolResultNote(
+          event.content,
+          `Failed to attach scorer images: ${message}`
+        )
+      };
     }
   });
 }
