@@ -158,14 +158,12 @@ code {
   line-height: 1;
 }
 
-.launch-checkline.is-done .launch-step-icon::before,
-.launch-target-panel.is-done .launch-step-icon::before {
+.launch-checkline.is-done .launch-step-icon::before {
   content: "✓";
   color: var(--success);
 }
 
-.launch-checkline.is-next .launch-step-icon::before,
-.launch-target-panel.is-next .launch-step-icon::before {
+.launch-checkline.is-next .launch-step-icon::before {
   content: "•";
   color: var(--accent);
 }
@@ -1116,11 +1114,11 @@ th,
 
 @media (min-width: 1500px) {
   .launch-grid {
-    grid-template-columns: 320px minmax(0, 1fr) 400px;
+    grid-template-columns: 320px minmax(0, 1fr) auto;
   }
 
   .dashboard-body {
-    grid-template-columns: minmax(0, 1fr) 400px;
+    grid-template-columns: minmax(0, 1fr) 420px;
   }
 
   .summary-panel {
@@ -1134,34 +1132,37 @@ th,
 
 @media (max-width: 1200px) {
   .launch-grid {
-    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
   }
 
   .launch-brand {
     grid-column: 1 / -1;
-    border-bottom: 1px solid rgba(31, 27, 22, 0.08);
+    border-bottom: 1px solid var(--line);
   }
 
-  .launch-target-panel {
+  .launch-context {
     border-left: 0;
   }
 
-  .launch-ops {
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
-    border-left: 0;
-    border-top: 1px solid rgba(31, 27, 22, 0.08);
+  .launch-actions {
+    border-left: 1px solid var(--line);
   }
 
-  .launch-checkline {
-    padding: 0 16px;
+  .launch-readiness {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
   }
 
   .launch-checkline + .launch-checkline {
-    padding-top: 0;
-    border-top: 0;
-    border-left: 1px solid rgba(31, 27, 22, 0.08);
+    border-left: 1px solid var(--line);
+  }
+
+  .launch-checkline:nth-child(2n + 1) {
+    border-left: 0;
+  }
+
+  .launch-checkline:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
   }
 
   .dashboard-body {
@@ -1186,7 +1187,7 @@ th,
 
   .main-column,
   .sidebar {
-    gap: 16px;
+    gap: 0;
   }
 
   .launch-grid {
@@ -1194,36 +1195,24 @@ th,
   }
 
   .launch-brand,
-  .launch-target-panel,
-  .launch-ops {
+  .launch-context,
+  .launch-actions {
     padding: 18px 16px;
   }
 
   .launch-brand,
-  .launch-target-panel,
-  .launch-ops {
+  .launch-context,
+  .launch-actions {
     border: 0;
   }
 
-  .launch-target-panel,
-  .launch-ops {
-    border-top: 1px solid rgba(31, 27, 22, 0.08);
+  .launch-context,
+  .launch-actions {
+    border-top: 1px solid var(--line);
   }
 
-  .launch-ops {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 16px;
-    background: rgba(255, 255, 255, 0.5);
-  }
-
-  .launch-checkline {
-    padding: 0;
-    min-width: 0;
-  }
-
-  .launch-checkline + .launch-checkline {
-    border: 0;
+  .launch-actions {
+    justify-items: stretch;
   }
 
   .summary-rail {
@@ -1233,16 +1222,8 @@ th,
 
   .sidebar {
     border-left: 0;
-    border-top: 1px solid rgba(31, 27, 22, 0.08);
+    border-top: 1px solid var(--line);
     background: transparent;
-  }
-
-  .summary-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .metric-tile {
-    padding: 12px 10px;
   }
 
   .score-line strong {
@@ -1263,6 +1244,10 @@ th,
   .mini-stats.compact {
     min-width: 0;
     width: 100%;
+  }
+
+  .mini-stats.compact {
+    justify-content: space-between;
   }
 
   .arena-panel {
@@ -1349,11 +1334,26 @@ th,
 
 @media (max-width: 640px) {
   .launch-brandline {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .launch-description {
     font-size: 0.8rem;
+  }
+
+  .launch-readiness {
+    grid-template-columns: 1fr;
+  }
+
+  .launch-checkline,
+  .launch-checkline + .launch-checkline,
+  .launch-checkline:nth-child(n + 3) {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .launch-checkline:first-child {
+    border-top: 0;
   }
 
   .launch-target-controls {
@@ -1364,10 +1364,6 @@ th,
   .launch-link-control,
   .launch-button {
     width: 100%;
-  }
-
-  .summary-metrics {
-    grid-template-columns: 1fr;
   }
 
   .inspection-shell {

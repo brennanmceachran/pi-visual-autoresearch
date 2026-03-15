@@ -21,10 +21,11 @@ const elements = {
   uploadButton: document.querySelector("#upload-button"),
   evaluateButton: document.querySelector("#evaluate-button"),
   headerState: document.querySelector("#header-state"),
+  targetSummary: document.querySelector("#target-summary"),
   targetCheckMeta: document.querySelector("#target-check-meta"),
   piCheckMeta: document.querySelector("#pi-check-meta"),
   skillCheckMeta: document.querySelector("#skill-check-meta"),
-  checkTarget: document.querySelector("#upload-form"),
+  checkTarget: document.querySelector("#check-target"),
   checkPi: document.querySelector("#check-pi"),
   checkSkill: document.querySelector("#check-skill"),
   scoreValue: document.querySelector("#score-value"),
@@ -393,9 +394,12 @@ function renderLaunch(appState) {
   setLaunchStepState(elements.checkPi, hasTarget ? "is-next" : "");
   setLaunchStepState(elements.checkSkill, hasTarget ? "is-next" : "");
 
-  elements.targetCheckMeta.textContent = hasTarget
+  elements.targetSummary.textContent = hasTarget
     ? `${target.originalName} · ${target.width}x${target.height}`
     : "No target loaded";
+  elements.targetCheckMeta.textContent = hasTarget
+    ? "ready"
+    : "waiting for upload";
   elements.piCheckMeta.textContent = hasTarget
     ? "pnpm pi"
     : "waiting for target";
@@ -409,7 +413,7 @@ function renderLaunch(appState) {
 
   elements.headerState.textContent = hasTarget
     ? hasReport
-      ? "Target locked. Pi can iterate while you watch the diff fall."
+      ? "Live target locked. Pi can keep iterating while the curve settles."
       : "Target loaded. Start Pi, then run the local skill."
     : "Load a target to start a new battleground session.";
 }
