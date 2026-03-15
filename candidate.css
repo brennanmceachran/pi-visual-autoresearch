@@ -125,8 +125,8 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(53, 65px);
-  grid-template-rows: repeat(7, 65px);
+  grid-template-columns: repeat(53, 66px);
+  grid-template-rows: repeat(7, 66px);
   gap: 0;
   justify-items: center;
   align-items: center;
@@ -134,9 +134,9 @@ body {
 
 .cell,
 .legend-box {
-  width: 65px;
-  height: 65px;
-  border-radius: 25px;
+  width: 66px;
+  height: 66px;
+  border-radius: 26px;
   display: block;
 }
 
