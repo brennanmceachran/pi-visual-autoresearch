@@ -100,7 +100,7 @@ h2 {
 }
 
 .months {
-  margin-left: calc(40px * var(--u));
+  margin-left: calc(41px * var(--u));
   margin-bottom: calc(8px * var(--u));
   display: grid;
   grid-template-columns: repeat(13, 1fr);
@@ -145,7 +145,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: calc(8px * var(--u));
-  margin: calc(16px * var(--u)) 0 0 calc(40px * var(--u));
+  margin: calc(16px * var(--u)) 0 0 calc(41px * var(--u));
   color: #4b5563;
   font-size: calc(11px * var(--u));
 }
