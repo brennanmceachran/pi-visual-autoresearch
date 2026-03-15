@@ -37,7 +37,7 @@ body {
 
 .top {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1.38fr 1fr;
   align-items: start;
   margin-bottom: calc(18px * var(--u));
 }
