@@ -39,7 +39,7 @@ body {
   width: 4000px;
   min-height: 5014px;
   background: #000;
-  padding: 146px 136px 40px;
+  padding: 142px 110px 40px;
 }
 
 .panel {
@@ -72,8 +72,8 @@ body {
 .metric-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 104px;
-  width: 1570px;
+  gap: 92px;
+  width: 1630px;
 }
 
 .metric { text-align: right; }
@@ -97,9 +97,9 @@ body {
 
 .months-row {
   display: grid;
-  grid-template-columns: 128px repeat(13, 1fr);
-  width: 3640px;
-  margin-bottom: 36px;
+  grid-template-columns: 120px repeat(13, 1fr);
+  width: 3760px;
+  margin-bottom: 38px;
   color: #8d8985;
   font-size: 42px;
   line-height: 1;
@@ -115,52 +115,52 @@ body {
 }
 
 .ylabels {
-  width: 90px;
+  width: 86px;
   display: grid;
-  grid-template-rows: repeat(6, 57px);
+  grid-template-rows: repeat(6, 62px);
   color: #8d8985;
   font-size: 42px;
-  line-height: 57px;
+  line-height: 62px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(53, 48px);
-  grid-template-rows: repeat(6, 48px);
-  gap: 9px;
+  grid-template-columns: repeat(53, 54px);
+  grid-template-rows: repeat(6, 54px);
+  gap: 8px;
   justify-items: center;
   align-items: center;
 }
 
 .cell,
 .legend-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 54px;
+  height: 54px;
+  border-radius: 13px;
   display: block;
 }
 
 .cell-hidden { opacity: 0; }
-.cell-offset { transform: translateX(-57px); }
+.cell-offset { transform: translateX(-62px); }
 
-.panel-warm .lvl-0 { background: var(--warm-0); }
+.panel-warm .lvl-0 { background: #efefed; }
 .panel-warm .lvl-1 { background: var(--warm-1); }
 .panel-warm .lvl-2 { background: var(--warm-2); }
 .panel-warm .lvl-3 { background: var(--warm-3); }
 .panel-warm .lvl-4 { background: var(--warm-4); }
-.panel-cool .lvl-0 { background: var(--cool-0); }
+.panel-cool .lvl-0 { background: #edf0fd; }
 .panel-cool .lvl-1 { background: var(--cool-1); }
 .panel-cool .lvl-2 { background: var(--cool-2); }
 .panel-cool .lvl-3 { background: var(--cool-3); }
 .panel-cool .lvl-4 { background: var(--cool-4); }
-.panel-mono .lvl-0 { background: var(--mono-0); }
+.panel-mono .lvl-0 { background: #ececec; }
 .panel-mono .lvl-1 { background: var(--mono-1); }
 .panel-mono .lvl-2 { background: var(--mono-2); }
 .panel-mono .lvl-3 { background: var(--mono-3); }
 .panel-mono .lvl-4 { background: var(--mono-4); }
 
 .note {
-  margin: 24px 0 0 735px;
+  margin: 24px 0 0 790px;
   color: #8d8986;
   font-size: 27px;
   line-height: 1.25;
