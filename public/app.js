@@ -12,6 +12,7 @@ const state = {
   lastTargetKey: null,
   lastReportKey: null,
   pollTimer: null,
+  liveTimer: null,
   curveChart: null
 };
 
@@ -163,6 +164,26 @@ function formatSummaryTimestamp(value) {
       });
 
   return `Updated ${formatted}`;
+}
+
+function renderLiveTimers(appState) {
+  const target = appState?.target;
+  const historyRuns = appState?.history?.runs ?? [];
+  const latestRun = historyRuns[historyRuns.length - 1] ?? null;
+  const targetTimestamp = target ? new Date(target.updatedAt).getTime() : null;
+  const currentRunStart = latestRun?.timestamp ?? targetTimestamp;
+
+  const totalTimeMs =
+    typeof targetTimestamp === "number" && Number.isFinite(targetTimestamp)
+      ? Math.max(Date.now() - targetTimestamp, 0)
+      : null;
+  const currentRunMs =
+    typeof currentRunStart === "number" && Number.isFinite(currentRunStart)
+      ? Math.max(Date.now() - currentRunStart, 0)
+      : null;
+
+  elements.totalTimeValue.textContent = formatDurationCompact(totalTimeMs);
+  elements.currentRunTimeValue.textContent = formatDurationCompact(currentRunMs);
 }
 
 function setLaunchStepState(element, nextState) {
@@ -689,7 +710,6 @@ function renderLaunch(appState) {
 function renderSummary(appState) {
   const report = appState.report;
   const runs = appState.history?.runs ?? [];
-  const target = appState.target;
   const currentScore = report?.score ?? null;
   const currentDifference = report?.difference ?? null;
   const baselineScore = runs.length ? runs[0].metric : currentScore;
@@ -708,31 +728,7 @@ function renderSummary(appState) {
   elements.bestScoreValue.textContent = bestScore > 0 ? formatMetric(bestScore, "%") : "--";
   elements.evalValue.textContent =
     typeof report?.evaluationMs === "number" ? `${report.evaluationMs}ms` : "--";
-
-  const latestRun = runs[runs.length - 1] ?? null;
-  const reportTimestamp = report ? new Date(report.generatedAt).getTime() : null;
-  const targetTimestamp = target ? new Date(target.updatedAt).getTime() : null;
-  const lastRunTimestamp = latestRun?.timestamp ?? null;
-  const lastRunMetric = latestRun?.metric ?? null;
-  const hasUnloggedCurrentRun =
-    typeof currentScore === "number" &&
-    typeof lastRunMetric === "number" &&
-    Math.abs(currentScore - lastRunMetric) > 0.0001;
-  const totalTimeMs =
-    targetTimestamp !== null && reportTimestamp !== null
-      ? Math.max(reportTimestamp - targetTimestamp, 0)
-      : targetTimestamp !== null
-        ? Math.max(Date.now() - targetTimestamp, 0)
-        : null;
-  const currentRunMs =
-    hasUnloggedCurrentRun && reportTimestamp !== null && lastRunTimestamp !== null
-      ? Math.max(reportTimestamp - lastRunTimestamp, 0)
-      : typeof report?.evaluationMs === "number"
-        ? report.evaluationMs
-        : null;
-
-  elements.totalTimeValue.textContent = formatDurationCompact(totalTimeMs);
-  elements.currentRunTimeValue.textContent = formatDurationCompact(currentRunMs);
+  renderLiveTimers(appState);
 
   if (typeof currentScore === "number" && typeof baselineScore === "number") {
     const delta = Number((currentScore - baselineScore).toFixed(4));
@@ -906,6 +902,14 @@ state.pollTimer = window.setInterval(() => {
 
   refreshState({ silent: true });
 }, POLL_INTERVAL_MS);
+
+state.liveTimer = window.setInterval(() => {
+  if (document.hidden || !state.appState) {
+    return;
+  }
+
+  renderLiveTimers(state.appState);
+}, 1000);
 
 setDiffView(state.diffView);
 setComparePosition(state.compareX, state.compareY);
