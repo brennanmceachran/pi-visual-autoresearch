@@ -15,6 +15,35 @@ const resettableFiles = [
   join(root, "autoresearch.ideas.md"),
   targetInfoPath
 ];
+const defaultCandidateHtml = `<main class="frame" aria-label="candidate surface"></main>
+`;
+const defaultCandidateCss = `/* The evaluator already provides the full target-sized stage. Fill it directly. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  background: #ffffff;
+  color: #111111;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.frame {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+`;
 
 async function clearDirectory(directory, keep = []) {
   try {
@@ -31,8 +60,8 @@ async function clearDirectory(directory, keep = []) {
 
 await Promise.all(resettableFiles.map((path) => rm(path, { force: true })));
 await Promise.all([
-  writeFile(join(root, "candidate.html"), "\n"),
-  writeFile(join(root, "candidate.css"), "\n")
+  writeFile(join(root, "candidate.html"), defaultCandidateHtml),
+  writeFile(join(root, "candidate.css"), defaultCandidateCss)
 ]);
 await Promise.all([
   clearDirectory(artifactsDir, [".gitkeep"]),
