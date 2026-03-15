@@ -21,32 +21,12 @@
         <section class="launch-shell">
           <div class="launch-grid" aria-label="Session readiness">
             <div class="launch-brand">
-              <div class="launch-copy">
-                <div class="launch-eyebrow">Pi Visual Autoresearch</div>
-                <div class="launch-brandline">Visual Diff Battleground</div>
-              </div>
-              <p id="header-state" class="launch-description">
-                The server is live. Load a target, let Pi iterate, and watch the diff tighten.
-              </p>
+              <div class="launch-eyebrow">Pi Visual Autoresearch</div>
+              <div class="launch-brandline">Visual Diff Battleground</div>
             </div>
-
-            <div class="launch-context" aria-label="Active session">
-              <div class="launch-context-copy">
-                <span class="launch-context-label">Active target</span>
-                <strong id="target-summary" class="launch-context-value">No target loaded</strong>
-                <span class="launch-context-meta">Scoring refreshes every 4 seconds. Lower diff is better.</span>
-              </div>
-            </div>
-
-            <form id="upload-form" class="launch-actions" aria-label="Target setup">
-              <label class="sr-only" for="target-input">Target image</label>
-              <input id="target-input" class="launch-file-input" name="target" type="file" accept="image/*" />
-              <div class="launch-target-controls">
-                <label for="target-input" class="launch-link-control">Select image</label>
-                <button id="upload-button" class="action launch-button" type="submit">Upload target</button>
-              </div>
-              <span id="selected-file" class="launch-selection is-empty">No replacement selected</span>
-            </form>
+            <p id="header-state" class="launch-description">
+              The server is live. Load a target, let Pi iterate, and watch the diff tighten.
+            </p>
           </div>
 
           <div class="launch-readiness" aria-label="Readiness checklist">
@@ -58,13 +38,16 @@
               </div>
             </div>
 
-            <div class="launch-checkline" id="check-target">
+            <form id="upload-form" class="launch-checkline launch-checkline-target" aria-label="Target setup">
+              <label class="sr-only" for="target-input">Target image</label>
+              <input id="target-input" class="launch-file-input" name="target" type="file" accept="image/*" />
               <span class="launch-step-icon" aria-hidden="true"></span>
               <div class="launch-slot-copy">
                 <span class="launch-step-label">Target</span>
                 <span id="target-check-meta" class="launch-step-meta">waiting for upload</span>
               </div>
-            </div>
+              <button id="upload-button" class="launch-target-button" type="button">Upload target</button>
+            </form>
 
             <div class="launch-checkline" id="check-pi">
               <span class="launch-step-icon" aria-hidden="true"></span>
@@ -124,18 +107,23 @@
                     <h2>Diff curve</h2>
                     <p>Lower is better. The line should fall as the agent learns.</p>
                   </div>
+                  <div class="curve-legend" aria-label="Curve legend">
+                    <span class="curve-legend-item">
+                      <span class="curve-legend-dot curve-legend-dot-discard" aria-hidden="true"></span>
+                      All runs
+                    </span>
+                    <span class="curve-legend-item">
+                      <span class="curve-legend-dot curve-legend-dot-keep" aria-hidden="true"></span>
+                      Keep path
+                    </span>
+                  </div>
                 </div>
 
                 <div class="curve-shell">
-                  <svg id="curve-svg" viewBox="0 0 420 180" preserveAspectRatio="none">
-                    <path id="curve-area" class="curve-area" d=""></path>
-                    <path id="curve-path" class="curve-path" d=""></path>
-                    <g id="curve-points"></g>
-                  </svg>
-                  <div class="curve-axis">
-                    <span id="curve-start-label">Run 1</span>
-                    <span id="curve-end-label">Latest</span>
+                  <div class="curve-canvas-shell">
+                    <canvas id="curve-canvas" aria-label="Visual diff progress chart"></canvas>
                   </div>
+                  <div id="curve-tooltip" class="curve-tooltip" hidden></div>
                 </div>
               </div>
             </section>
@@ -273,7 +261,7 @@
         </div>
       </section>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <script type="module" src="/app.js"></script>
   </body>
 </html>

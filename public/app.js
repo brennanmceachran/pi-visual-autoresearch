@@ -11,21 +11,20 @@ const state = {
   lastDifference: null,
   lastTargetKey: null,
   lastReportKey: null,
-  pollTimer: null
+  pollTimer: null,
+  curveChart: null
 };
 
 const elements = {
   uploadForm: document.querySelector("#upload-form"),
   targetInput: document.querySelector("#target-input"),
-  selectedFile: document.querySelector("#selected-file"),
   uploadButton: document.querySelector("#upload-button"),
   evaluateButton: document.querySelector("#evaluate-button"),
   headerState: document.querySelector("#header-state"),
-  targetSummary: document.querySelector("#target-summary"),
   targetCheckMeta: document.querySelector("#target-check-meta"),
   piCheckMeta: document.querySelector("#pi-check-meta"),
   skillCheckMeta: document.querySelector("#skill-check-meta"),
-  checkTarget: document.querySelector("#check-target"),
+  checkTarget: document.querySelector("#upload-form"),
   checkPi: document.querySelector("#check-pi"),
   checkSkill: document.querySelector("#check-skill"),
   scoreValue: document.querySelector("#score-value"),
@@ -53,11 +52,9 @@ const elements = {
   diffToggleButtons: Array.from(document.querySelectorAll("[data-diff-view]")),
   historyList: document.querySelector("#history-list"),
   historyName: document.querySelector("#history-name"),
-  curvePath: document.querySelector("#curve-path"),
-  curveArea: document.querySelector("#curve-area"),
-  curvePoints: document.querySelector("#curve-points"),
-  curveStartLabel: document.querySelector("#curve-start-label"),
-  curveEndLabel: document.querySelector("#curve-end-label")
+  curveShell: document.querySelector(".curve-shell"),
+  curveCanvas: document.querySelector("#curve-canvas"),
+  curveTooltip: document.querySelector("#curve-tooltip")
 };
 
 function setBusy(nextBusy) {
@@ -122,18 +119,6 @@ function setLaunchStepState(element, nextState) {
   }
 }
 
-function renderSelectedFileChip(appState = state.appState) {
-  const pendingFile = elements.targetInput.files?.[0];
-
-  if (pendingFile) {
-    elements.selectedFile.textContent = `queued: ${pendingFile.name}`;
-    elements.selectedFile.classList.remove("is-empty");
-    return;
-  }
-  elements.selectedFile.textContent = "";
-  elements.selectedFile.classList.add("is-empty");
-}
-
 function pulse(element) {
   if (!element) return;
   element.classList.remove("is-updating");
@@ -190,91 +175,324 @@ function setDiffView(nextView) {
   }
 }
 
-function buildCurveValues(appState) {
-  const values = [];
+function buildCurveRuns(appState) {
+  const runs = appState.history?.runs ?? [];
+  const curveRuns = runs.map((run, index) => ({
+    runIndex: index,
+    x: index,
+    score: Number(run.metric.toFixed(4)),
+    diff: Number((100 - run.metric).toFixed(4)),
+    y: Number((100 - run.metric).toFixed(4)),
+    status: run.status || "discard",
+    description: run.description || "No description",
+    commit: run.commit || "",
+    timestamp: typeof run.timestamp === "number" ? run.timestamp : null,
+    label: `Run ${index}`
+  }));
 
-  for (const run of appState.history?.runs ?? []) {
-    values.push(Number((100 - run.metric).toFixed(4)));
-  }
+  const report = appState.report;
+  if (report) {
+    const currentDiff = Number(report.difference.toFixed(4));
+    const last = curveRuns[curveRuns.length - 1];
+    const lastDiff = last ? last.diff : null;
 
-  if (appState.report) {
-    const current = Number(appState.report.difference.toFixed(4));
-    const last = values[values.length - 1];
-    if (typeof last !== "number" || Math.abs(last - current) > 0.0001) {
-      values.push(current);
+    if (lastDiff === null || Math.abs(lastDiff - currentDiff) > 0.0001) {
+      curveRuns.push({
+        runIndex: curveRuns.length,
+        x: curveRuns.length,
+        score: Number(report.score.toFixed(4)),
+        diff: currentDiff,
+        y: currentDiff,
+        status: "current",
+        description: "Current evaluation",
+        commit: "live",
+        timestamp: new Date(report.generatedAt).getTime(),
+        label: `Run ${curveRuns.length}`
+      });
     }
   }
 
-  return values;
+  const bestDiff = curveRuns.length ? Math.min(...curveRuns.map((run) => run.diff)) : null;
+  return curveRuns.map((run) => ({
+    ...run,
+    isBest: bestDiff !== null && Math.abs(run.diff - bestDiff) < 0.0001
+  }));
 }
 
-function drawCurve(appState) {
-  const values = buildCurveValues(appState);
+function buildKeepStepPath(keepRuns) {
+  if (!keepRuns.length) {
+    return [];
+  }
 
-  if (!values.length) {
-    elements.curvePath.setAttribute("d", "");
-    elements.curveArea.setAttribute("d", "");
-    elements.curvePoints.innerHTML = "";
-    elements.curveStartLabel.textContent = "Run 1";
-    elements.curveEndLabel.textContent = "Waiting for data";
+  const path = [{ x: keepRuns[0].x, y: keepRuns[0].y }];
+
+  for (let index = 1; index < keepRuns.length; index += 1) {
+    const previous = keepRuns[index - 1];
+    const current = keepRuns[index];
+
+    path.push({
+      x: current.x,
+      y: previous.y
+    });
+    path.push({
+      x: current.x,
+      y: current.y
+    });
+  }
+
+  return path;
+}
+
+function formatCurvePercentTick(value) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "";
+  }
+
+  return `${value >= 10 ? value.toFixed(0) : value.toFixed(1)}%`;
+}
+
+function setCurveTooltip(context) {
+  const tooltip = context.tooltip;
+  if (!tooltip || tooltip.opacity === 0 || !tooltip.dataPoints.length) {
+    elements.curveTooltip.hidden = true;
     return;
   }
 
-  const width = 420;
-  const height = 180;
-  const left = 10;
-  const right = 12;
-  const top = 12;
-  const bottom = 20;
-  const rawMin = Math.min(...values);
-  const rawMax = Math.max(...values);
-  const hasVariation = rawMax - rawMin > 0.0001;
-  const padding = hasVariation ? Math.max((rawMax - rawMin) * 0.18, 0.25) : 1;
-  const min = rawMin - padding;
-  const max = rawMax + padding;
-  const range = max - min || 1;
+  const point = tooltip.dataPoints[0].raw;
+  if (!point) {
+    elements.curveTooltip.hidden = true;
+    return;
+  }
 
-  const points = values.map((value, index) => {
-    const x =
-      values.length === 1
-        ? (width - left - right) / 2 + left
-        : left + ((width - left - right) * index) / (values.length - 1);
-    const y = top + ((max - value) / range) * (height - top - bottom);
-    return { x, y, value, index };
+  const statusLabel =
+    point.status === "keep" ? "Keep" : point.status === "discard" ? "Discard" : "Current";
+  const timeLabel = point.timestamp ? new Date(point.timestamp).toLocaleString() : "No timestamp";
+  const note = point.description ? point.description : "No notes for this run.";
+  const commitLabel = point.commit ? point.commit : "No commit";
+
+  elements.curveTooltip.innerHTML = `
+    <p class="curve-tooltip-run">${point.label} · ${statusLabel}</p>
+    <p class="curve-tooltip-meta">${point.score.toFixed(4)}% match · ${point.diff.toFixed(4)}% diff</p>
+    <p class="curve-tooltip-meta">${commitLabel} · ${timeLabel}</p>
+    <p class="curve-tooltip-note">${note}</p>
+  `;
+
+  const { chart } = context;
+  const shellRect = elements.curveShell.getBoundingClientRect();
+  elements.curveTooltip.hidden = false;
+  const tooltipRect = elements.curveTooltip.getBoundingClientRect();
+  let left = tooltip.caretX + 16;
+  let top = tooltip.caretY - tooltipRect.height - 14;
+
+  if (left + tooltipRect.width > chart.width - 8) {
+    left = tooltip.caretX - tooltipRect.width - 16;
+  }
+
+  if (top < 8) {
+    top = tooltip.caretY + 16;
+  }
+
+  left = Math.max(8, Math.min(left, shellRect.width - tooltipRect.width - 8));
+  top = Math.max(8, Math.min(top, shellRect.height - tooltipRect.height - 8));
+
+  elements.curveTooltip.style.left = `${left}px`;
+  elements.curveTooltip.style.top = `${top}px`;
+}
+
+function createCurveChart() {
+  if (state.curveChart || !elements.curveCanvas || !window.Chart) {
+    return;
+  }
+
+  state.curveChart = new window.Chart(elements.curveCanvas, {
+    type: "scatter",
+    data: {
+      datasets: []
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      layout: {
+        padding: {
+          top: 2,
+          right: 0,
+          bottom: 2,
+          left: 2
+        }
+      },
+      interaction: {
+        mode: "nearest",
+        axis: "xy",
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          enabled: false,
+          external: setCurveTooltip
+        }
+      },
+      scales: {
+        x: {
+          type: "linear",
+          display: true,
+          min: -0.12,
+          grid: {
+            display: true,
+            color: "rgba(17, 17, 17, 0.045)",
+            drawBorder: false
+          },
+          ticks: {
+            display: true,
+            color: "rgba(17, 17, 17, 0.56)",
+            font: {
+              family: "Geist Mono, IBM Plex Mono, monospace",
+              size: 10,
+              weight: "500"
+            },
+            maxTicksLimit: 8,
+            autoSkip: true,
+            padding: 6,
+            callback(value) {
+              if (!Number.isInteger(value) || value < 0) {
+                return "";
+              }
+
+              return value;
+            }
+          },
+          title: {
+            display: true,
+            text: "Runs",
+            color: "rgba(17, 17, 17, 0.48)",
+            align: "end",
+            padding: {
+              top: 6
+            },
+            font: {
+              family: "Geist Mono, IBM Plex Mono, monospace",
+              size: 10,
+              weight: "600"
+            }
+          },
+          border: {
+            display: false
+          }
+        },
+        y: {
+          display: true,
+          grace: "8%",
+          grid: {
+            color: "rgba(17, 17, 17, 0.05)",
+            drawBorder: false
+          },
+          ticks: {
+            display: true,
+            color: "rgba(17, 17, 17, 0.56)",
+            font: {
+              family: "Geist Mono, IBM Plex Mono, monospace",
+              size: 10,
+              weight: "500"
+            },
+            maxTicksLimit: 6,
+            padding: 4,
+            callback(value) {
+              return formatCurvePercentTick(value);
+            }
+          },
+          title: {
+            display: false
+          },
+          border: {
+            display: false
+          }
+        }
+      }
+    }
   });
 
-  const pathData =
-    points.length > 1
-      ? points
-          .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
-          .join(" ")
-      : "";
+  window.__curveChart = state.curveChart;
+}
 
-  const areaData =
-    points.length > 1 && hasVariation
-      ? `${pathData} L ${points[points.length - 1].x.toFixed(2)} ${(height - bottom).toFixed(2)} L ${points[0].x.toFixed(2)} ${(height - bottom).toFixed(2)} Z`
-      : "";
+function drawCurve(appState) {
+  const curveRuns = buildCurveRuns(appState);
+  createCurveChart();
 
-  elements.curvePath.setAttribute("d", pathData);
-  elements.curveArea.setAttribute("d", areaData);
+  if (!state.curveChart) {
+    return;
+  }
 
-  const bestValue = Math.min(...values);
-  elements.curvePoints.innerHTML = points
-    .map((point, index) => {
-      const classes = ["curve-point"];
-      if (Math.abs(point.value - bestValue) < 0.0001) {
-        classes.push("best");
-      }
-      if (index === points.length - 1) {
-        classes.push("current");
-      }
-      return `<circle class="${classes.join(" ")}" cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="${index === points.length - 1 ? 4.5 : 3.5}"></circle>`;
-    })
-    .join("");
+  if (!curveRuns.length) {
+    state.curveChart.data.datasets = [];
+    state.curveChart.update("none");
+    elements.curveTooltip.hidden = true;
+    return;
+  }
 
-  elements.curveStartLabel.textContent =
-    values.length > 1 ? `Run 1 · ${values[0].toFixed(2)}% diff` : "Current frame";
-  elements.curveEndLabel.textContent = `Latest · ${values[values.length - 1].toFixed(2)}% diff`;
+  const allLoggedRuns = curveRuns.filter((run) => run.status !== "current");
+  const keepRuns = curveRuns.filter((run, index) => run.status === "keep" || index === 0);
+  const keepPath = buildKeepStepPath(keepRuns);
+  const currentRuns = curveRuns.filter((run) => run.status === "current");
+  const maxRunIndex = Math.max(...curveRuns.map((run) => run.runIndex), 0);
+
+  state.curveChart.options.scales.x.max = Math.max(maxRunIndex + 0.02, 1);
+  state.curveChart.data.datasets = [
+    {
+      type: "scatter",
+      data: allLoggedRuns,
+      parsing: false,
+      pointRadius: 3.6,
+      pointHoverRadius: 5.8,
+      pointBorderWidth: 0,
+      pointBackgroundColor: "rgba(17, 17, 17, 0.18)",
+      pointBorderColor: "rgba(17, 17, 17, 0.18)"
+    },
+    {
+      type: "line",
+      data: keepPath,
+      parsing: false,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      pointHitRadius: 0,
+      borderColor: "#0a7b44",
+      borderWidth: 2.5,
+      borderCapStyle: "round",
+      borderJoinStyle: "round",
+      fill: false
+    },
+    {
+      type: "scatter",
+      data: keepRuns,
+      parsing: false,
+      pointRadius(context) {
+        return context.raw?.isBest ? 6.4 : 5.4;
+      },
+      pointHoverRadius(context) {
+        return context.raw?.isBest ? 8 : 7;
+      },
+      pointBorderWidth: 2.5,
+      pointBackgroundColor(context) {
+        return context.raw?.isBest ? "#0a7b44" : "#ffffff";
+      },
+      pointBorderColor: "#0a7b44"
+    },
+    {
+      type: "scatter",
+      data: currentRuns,
+      parsing: false,
+      pointRadius: 6.2,
+      pointHoverRadius: 7.2,
+      pointBorderWidth: 2,
+      pointBackgroundColor: "#0a7b44",
+      pointBorderColor: "#ffffff"
+    }
+  ];
+
+  state.curveChart.update("none");
+  window.__curveChart = state.curveChart;
 }
 
 function renderImages(appState, options = {}) {
@@ -394,12 +612,9 @@ function renderLaunch(appState) {
   setLaunchStepState(elements.checkPi, hasTarget ? "is-next" : "");
   setLaunchStepState(elements.checkSkill, hasTarget ? "is-next" : "");
 
-  elements.targetSummary.textContent = hasTarget
-    ? `${target.originalName} · ${target.width}x${target.height}`
-    : "No target loaded";
   elements.targetCheckMeta.textContent = hasTarget
     ? "ready"
-    : "waiting for upload";
+    : "no target set";
   elements.piCheckMeta.textContent = hasTarget
     ? "pnpm pi"
     : "waiting for target";
@@ -407,15 +622,15 @@ function renderLaunch(appState) {
     ? "/skill:visual-diff-autoresearch"
     : "waiting for Pi";
   elements.uploadButton.textContent = hasTarget
-    ? "Replace target"
+    ? "Replace"
     : "Upload target";
-  renderSelectedFileChip(appState);
+  elements.uploadForm.classList.toggle("is-empty", !hasTarget);
 
   elements.headerState.textContent = hasTarget
     ? hasReport
       ? "Live target locked. Pi can keep iterating while the curve settles."
-      : "Target loaded. Start Pi, then run the local skill."
-    : "Load a target to start a new battleground session.";
+      : "Target loaded. Start Pi and run the skill."
+    : "Upload a target to start a new battleground session.";
 }
 
 function renderSummary(appState) {
@@ -515,12 +730,10 @@ async function refreshState(options = {}) {
   }
 }
 
-elements.uploadForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
+async function uploadSelectedTarget() {
   const file = elements.targetInput.files?.[0];
   if (!file) {
-    setFeedback("Choose an image to upload first.", true);
+    setFeedback("", false);
     return;
   }
 
@@ -537,16 +750,20 @@ elements.uploadForm.addEventListener("submit", async (event) => {
     renderState(payload.state, { force: true });
     setFeedback("Target uploaded and score refreshed.");
     elements.targetInput.value = "";
-    renderSelectedFileChip(payload.state);
   } catch (error) {
     setFeedback(error instanceof Error ? error.message : String(error), true);
   } finally {
     setBusy(false);
   }
+}
+
+elements.uploadButton.addEventListener("click", () => {
+  if (state.busy) return;
+  elements.targetInput.click();
 });
 
 elements.targetInput.addEventListener("change", () => {
-  renderSelectedFileChip();
+  void uploadSelectedTarget();
 });
 
 elements.evaluateButton.addEventListener("click", async () => {

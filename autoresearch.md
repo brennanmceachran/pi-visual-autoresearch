@@ -1,15 +1,11 @@
-# Visual Diff Autoresearch
+# Autoresearch
 
-Target: `heatmap-last-year.png` (`4000×5014`)
+Objective: improve the `similarity` score from `pnpm research:score` by iterating on `candidate.html` and `candidate.css` only.
 
-Goal: maximize `similarity` from `pnpm research:score` by editing only:
+## Loop
 
-- `candidate.html`
-- `candidate.css`
-
-Working hypothesis:
-
-- Reconstruct the dark dashboard with three stacked sections.
-- Match the repeated rounded-square heatmap grids.
-- Approximate typography, spacing, legends, and highlighted cells.
-- Iterate from coarse layout to finer color/detail fixes.
+1. Run `pnpm research:score`.
+2. Inspect the scorer feedback from the experiment output attachments.
+3. Make a simple deterministic visual reconstruction edit.
+4. Keep changes only when `similarity` improves.
+5. Revert losing or crashing attempts and continue.
