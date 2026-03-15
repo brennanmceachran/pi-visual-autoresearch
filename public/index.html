@@ -18,31 +18,23 @@
   <body>
     <div class="app">
       <section class="panel launch-shell">
-        <div class="launch-masthead">
-          <div class="launch-copy">
-            <div class="launch-eyebrow">Pi Visual Autoresearch</div>
-            <div class="launch-brandline">Visual Diff Battleground</div>
-          </div>
-          <p id="header-state" class="launch-description">
-            The server is live. Add a target, start Pi, and run the local skill to begin the loop.
-          </p>
-        </div>
-
-        <div class="launch-deck" aria-label="Session readiness">
-          <div class="launch-slot launch-slot-static is-done" id="check-server">
-            <span class="launch-step-icon" aria-hidden="true"></span>
-            <div class="launch-slot-copy">
-              <span class="launch-step-label">Server</span>
-              <span class="launch-step-meta">127.0.0.1:4242</span>
+        <div class="launch-grid" aria-label="Session readiness">
+          <div class="launch-brand">
+            <div class="launch-copy">
+              <div class="launch-eyebrow">Pi Visual Autoresearch</div>
+              <div class="launch-brandline">Visual Diff Battleground</div>
             </div>
+            <p id="header-state" class="launch-description">
+              The server is live. Add a target, start Pi, and run the local skill to begin the loop.
+            </p>
           </div>
 
-          <form id="upload-form" class="launch-slot launch-slot-target" aria-label="Target setup">
+          <form id="upload-form" class="launch-target-panel" aria-label="Target setup">
             <label class="sr-only" for="target-input">Target image</label>
             <input id="target-input" class="launch-file-input" name="target" type="file" accept="image/*" />
 
             <div class="launch-target-copy">
-              <div class="launch-slot-copy">
+              <div class="launch-panel-label-row">
                 <span class="launch-step-icon" aria-hidden="true"></span>
                 <div class="launch-slot-text">
                   <span class="launch-step-label">Target</span>
@@ -51,25 +43,36 @@
               </div>
               <span id="selected-file" class="launch-selection is-empty">No replacement selected</span>
             </div>
+
             <div class="launch-target-controls">
-              <label for="target-input" class="launch-link-control">Select</label>
+              <label for="target-input" class="launch-link-control">Select image</label>
               <button id="upload-button" class="action launch-button" type="submit">Upload target</button>
             </div>
           </form>
 
-          <div class="launch-slot launch-slot-static" id="check-pi">
-            <span class="launch-step-icon" aria-hidden="true"></span>
-            <div class="launch-slot-copy">
-              <span class="launch-step-label">Pi</span>
-              <span id="pi-check-meta" class="launch-step-meta">after target upload</span>
+          <div class="launch-ops">
+            <div class="launch-checkline is-done" id="check-server">
+              <span class="launch-step-icon" aria-hidden="true"></span>
+              <div class="launch-slot-copy">
+                <span class="launch-step-label">Server</span>
+                <span class="launch-step-meta">127.0.0.1:4242</span>
+              </div>
             </div>
-          </div>
 
-          <div class="launch-slot launch-slot-static" id="check-skill">
-            <span class="launch-step-icon" aria-hidden="true"></span>
-            <div class="launch-slot-copy">
-              <span class="launch-step-label">Skill</span>
-              <span id="skill-check-meta" class="launch-step-meta">after Pi starts</span>
+            <div class="launch-checkline" id="check-pi">
+              <span class="launch-step-icon" aria-hidden="true"></span>
+              <div class="launch-slot-copy">
+                <span class="launch-step-label">Pi</span>
+                <span id="pi-check-meta" class="launch-step-meta">after target upload</span>
+              </div>
+            </div>
+
+            <div class="launch-checkline" id="check-skill">
+              <span class="launch-step-icon" aria-hidden="true"></span>
+              <div class="launch-slot-copy">
+                <span class="launch-step-label">Skill</span>
+                <span id="skill-check-meta" class="launch-step-meta">after Pi starts</span>
+              </div>
             </div>
           </div>
         </div>
@@ -249,30 +252,8 @@
               </div>
             </div>
 
-            <div class="table-shell">
-              <table class="history-table">
-                <colgroup>
-                  <col class="history-col history-col-index" />
-                  <col class="history-col history-col-commit" />
-                  <col class="history-col history-col-score" />
-                  <col class="history-col history-col-status" />
-                  <col class="history-col history-col-description" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Commit</th>
-                    <th>Score</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody id="history-body">
-                  <tr>
-                    <td colspan="5" class="empty-row">No experiment history yet.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div id="history-list" class="history-list">
+              <article class="history-item history-item-empty">No experiment history yet.</article>
             </div>
           </section>
         </aside>

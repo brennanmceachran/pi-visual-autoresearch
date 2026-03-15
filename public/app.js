@@ -50,7 +50,7 @@ const elements = {
   compareBaseImage: document.querySelector("#compare-base-image"),
   compareOverlayImage: document.querySelector("#compare-overlay-image"),
   diffToggleButtons: Array.from(document.querySelectorAll("[data-diff-view]")),
-  historyBody: document.querySelector("#history-body"),
+  historyList: document.querySelector("#history-list"),
   historyName: document.querySelector("#history-name"),
   curvePath: document.querySelector("#curve-path"),
   curveArea: document.querySelector("#curve-area"),
@@ -355,28 +355,30 @@ function renderHistory(appState) {
   elements.runCount.textContent = String(runs.length);
 
   if (!runs.length) {
-    elements.historyBody.innerHTML = `
-      <tr>
-        <td colspan="5" class="empty-row">No experiment history yet.</td>
-      </tr>
+    elements.historyList.innerHTML = `
+      <article class="history-item history-item-empty">No experiment history yet.</article>
     `;
     return;
   }
 
-  elements.historyBody.innerHTML = runs
+  elements.historyList.innerHTML = runs
     .slice()
     .reverse()
     .map((run, index) => {
       const runNumber = runs.length - index;
       const timestamp = run.timestamp ? new Date(run.timestamp).toLocaleString() : "";
+      const description = run.description || "No description";
       return `
-        <tr title="${timestamp}">
-          <td>${runNumber}</td>
-          <td><code>${run.commit}</code></td>
-          <td>${formatMetric(run.metric, history.metricUnit || "")}</td>
-          <td><span class="status-chip ${run.status}">${run.status}</span></td>
-          <td>${run.description || "No description"}</td>
-        </tr>
+        <article class="history-item" title="${timestamp}">
+          <div class="history-item-top">
+            <div class="history-item-run">#${runNumber}</div>
+            <code>${run.commit}</code>
+            <div class="history-item-score">${formatMetric(run.metric, history.metricUnit || "")}</div>
+            <span class="status-chip ${run.status}">${run.status}</span>
+          </div>
+          <p class="history-item-description">${description}</p>
+          <div class="history-item-time">${timestamp}</div>
+        </article>
       `;
     })
     .join("");
