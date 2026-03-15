@@ -38,22 +38,17 @@ function appendToolResultNote(
   const nextContent = [...content];
   const firstBlock = nextContent[0];
 
-  if (
-    firstBlock &&
-    typeof firstBlock === "object" &&
-    "type" in firstBlock &&
-    firstBlock.type === "text" &&
-    "text" in firstBlock &&
-    typeof firstBlock.text === "string"
-  ) {
-    nextContent[0] = {
+  if (firstBlock?.type === "text") {
+    const updatedFirstBlock: TextContent = {
       ...firstBlock,
       text: `${firstBlock.text}\n\n${note}`
     };
+    nextContent[0] = updatedFirstBlock;
     return nextContent;
   }
 
-  return [{ type: "text", text: note }, ...nextContent];
+  const noteBlock: TextContent = { type: "text", text: note };
+  return [noteBlock, ...nextContent];
 }
 
 type ToolResultPatch = {
