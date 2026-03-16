@@ -1,11 +1,11 @@
 :root {
   --bg: #fcfcf8;
-  --text: #1c1326;
-  --muted: #8f9389;
-  --panel: #71766c;
-  --pill: #45463f;
-  --accent: #9f4af3;
-  --button: #f2a238;
+  --text: #221a2c;
+  --muted: #97998d;
+  --panel: #7a7d73;
+  --pill: #4d4e47;
+  --accent: #a658f5;
+  --button: #f0a43d;
 }
 
 * {
@@ -37,16 +37,16 @@ body {
 .hero {
   width: 100%;
   max-width: 554px;
-  padding: 78px 18px 0;
+  padding: 82px 18px 0;
   text-align: center;
 }
 
 .headline {
   margin: 0;
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  letter-spacing: -0.045em;
 }
 
 .highlight {
@@ -54,8 +54,8 @@ body {
 }
 
 .tagline {
-  margin: 8px 0 14px;
-  font-size: 13px;
+  margin: 6px 0 13px;
+  font-size: 12px;
   line-height: 1.2;
   color: var(--muted);
   font-weight: 600;
@@ -63,7 +63,7 @@ body {
 
 .composer {
   width: 390px;
-  height: 98px;
+  height: 96px;
   margin: 0 auto;
   border-radius: 18px;
   background: var(--panel);
@@ -80,21 +80,21 @@ body {
   background: transparent;
   color: #f0f0ea;
   font: inherit;
-  font-size: 13px;
-  line-height: 1.25;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .composer textarea::placeholder {
-  color: #d6d7d1;
-  opacity: 0.8;
+  color: #d4d5ce;
+  opacity: 0.76;
 }
 
 .submit-btn {
   position: absolute;
   right: 14px;
   bottom: 14px;
-  width: 30px;
-  height: 30px;
+  width: 31px;
+  height: 31px;
   border: 0;
   border-radius: 10px;
   background: var(--button);
@@ -109,19 +109,19 @@ body {
 .suggestions {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 9px;
+  gap: 9px;
+  margin-top: 10px;
 }
 
 .pill {
-  min-width: 118px;
-  height: 36px;
+  min-width: 114px;
+  height: 35px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 17px;
   background: var(--pill);
   color: #f4f3ee;
   font: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   padding: 0 14px;
   white-space: nowrap;
