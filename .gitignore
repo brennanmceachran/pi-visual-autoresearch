@@ -9,6 +9,6 @@ data/target.json
 .pi/sessions/
 playwright-report/
 test-results/
-autoresearch.jsonl
-autoresearch.ideas.md
+**/autoresearch.jsonl
+**/autoresearch.ideas.md
 *.log

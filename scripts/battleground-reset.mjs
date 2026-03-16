@@ -1,8 +1,9 @@
-import { readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const arenaDir = join(root, "arena");
 const artifactsDir = join(root, ".artifacts", "latest");
 const sessionsDir = join(root, ".pi", "sessions");
 const runtimeStatusPath = join(root, ".pi", "runtime", "status.json");
@@ -12,8 +13,11 @@ const targetInfoPath = join(root, "data", "target.json");
 const resettableFiles = [
   join(root, "autoresearch.jsonl"),
   join(root, "autoresearch.md"),
+  join(arenaDir, "autoresearch.jsonl"),
+  join(arenaDir, "autoresearch.md"),
   join(root, "autoresearch.sh"),
   join(root, "autoresearch.ideas.md"),
+  join(arenaDir, "autoresearch.ideas.md"),
   targetInfoPath,
   runtimeStatusPath
 ];
@@ -61,9 +65,10 @@ async function clearDirectory(directory, keep = []) {
 }
 
 await Promise.all(resettableFiles.map((path) => rm(path, { force: true })));
+await mkdir(arenaDir, { recursive: true });
 await Promise.all([
-  writeFile(join(root, "candidate.html"), defaultCandidateHtml),
-  writeFile(join(root, "candidate.css"), defaultCandidateCss)
+  writeFile(join(arenaDir, "candidate.html"), defaultCandidateHtml),
+  writeFile(join(arenaDir, "candidate.css"), defaultCandidateCss)
 ]);
 await Promise.all([
   clearDirectory(artifactsDir, [".gitkeep"]),

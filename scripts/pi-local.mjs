@@ -10,6 +10,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const arenaDir = resolve(root, "arena");
 const agentDir = resolve(root, ".pi", "agent");
 const sessionsDir = resolve(root, ".pi", "sessions");
 const extensionsDir = resolve(root, ".pi", "extensions");
@@ -21,6 +22,7 @@ const extensionArgs = readdirSync(extensionsDir, { withFileTypes: true })
   .flatMap((entry) => ["--extension", resolve(extensionsDir, entry.name)]);
 
 mkdirSync(agentDir, { recursive: true });
+mkdirSync(arenaDir, { recursive: true });
 mkdirSync(sessionsDir, { recursive: true });
 mkdirSync(runtimeDir, { recursive: true });
 
@@ -99,7 +101,7 @@ const args = [
 
 const command = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const child = spawn(command, args, {
-  cwd: root,
+  cwd: arenaDir,
   stdio: "inherit",
   env: {
     ...process.env,

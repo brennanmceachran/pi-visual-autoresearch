@@ -1,33 +1,18 @@
 # Pi Visual Autoresearch
 
-This repository is a battleground for Pi's autoresearch loop.
+The battleground agent workspace now lives in `arena/`.
 
-## Primary goal
+If you are working as the optimization agent, start in:
 
-Optimize the visual similarity score between the active private target image and the rendered component defined by:
+- `arena/AGENTS.md`
+- `arena/candidate.html`
+- `arena/candidate.css`
 
-- `candidate.html`
-- `candidate.css`
+Infrastructure lives at repo root:
 
-## Normal workflow
+- `src/`
+- `public/`
+- `scripts/`
+- `.pi/extensions/`
 
-1. Read this file plus `candidate.html` and `candidate.css`.
-2. Evaluate with `pnpm research:score`.
-3. Use the `run_experiment` result itself as the feedback surface:
-   - score and metric text
-   - attached target image
-   - attached candidate capture
-   - attached diff heatmap
-4. Edit only the candidate files unless a change to the scoring pipeline is explicitly requested.
-
-## Guardrails
-
-- Do not modify or inspect private battleground paths such as `.pi/private/targets/`, `.pi/sessions/`, `data/target.json`, or `.artifacts/`.
-- Treat `candidate.html` as the primary editable surface. Keep structure simple and deterministic.
-- Use Tailwind utility classes in `candidate.html` when possible. Use `candidate.css` for anything custom that would be awkward in utilities.
-- The rendered component should fit the full target frame. The evaluator sets the stage size from the current target dimensions.
-- Avoid animations, timers, and random values in the candidate.
-- Never embed or fetch the target image or scorer artifacts. Honest reconstruction may use normal DOM, CSS, SVG, canvas, or script primitives, but must not depend on private battleground paths, network fetches, or `data:` URIs.
-- If asset loading is attempted, the evaluator will block network/private-path requests. Treat that as a cue to reconstruct honestly rather than trying another fetch path.
-- The evaluator rejects cheating candidates before scoring. If a run fails with a validation error, rewrite the candidate honestly instead of trying to bypass the rule.
-- Never fall back to reading artifact images directly. If visual feedback is missing from `run_experiment`, treat that as a battleground bug rather than reading `.artifacts/latest/*.png`.
+Do not change infrastructure unless the user explicitly asks for battleground implementation work.

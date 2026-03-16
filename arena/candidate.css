@@ -1,0 +1,10 @@
+/* The evaluator already provides the full target-sized stage. Fill it directly. */
+:root {
+--white: #fffffa;
+--orange: #f58f29;
+--purple: #A020F0;
+--dark-purple: #30173a;
+--light-gray: #e0e3def;
+--gray:#60695c;
+--dark-gray: #3c4238;
+}

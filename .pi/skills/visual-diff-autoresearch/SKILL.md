@@ -26,19 +26,16 @@ Do not inspect or edit private battleground paths such as `.pi/private/targets/`
    - `candidate.css`
 2. If there is no git branch for the run yet, create one:
    - `git checkout -b autoresearch/visual-diff-$(date +%Y%m%d-%H%M%S)`
-3. Write or refresh:
-   - `autoresearch.md`
-   - `autoresearch.sh`
-4. Initialize the loop:
+3. Initialize the loop:
    - `init_experiment`
      - `name`: `Visual diff battleground`
      - `metric_name`: `similarity`
      - `metric_unit`: `%`
      - `direction`: `higher`
-5. Run the baseline:
+4. Run the baseline:
    - `run_experiment` with `pnpm research:score`
    - use the attached scorer images in the `run_experiment` result instead of reading `.artifacts/latest/*.png`
-6. Parse the `METRIC name=value` lines from stdout and call `log_experiment`.
+5. Parse the `METRIC name=value` lines from stdout and call `log_experiment`.
 
 ## Metrics
 
@@ -64,16 +61,6 @@ Do not inspect or edit private battleground paths such as `.pi/private/targets/`
 - If an asset request is blocked by the evaluator, do not try alternate fetch paths. Reconstruct the frame honestly instead.
 - If the evaluator reports a validation failure, remove the forbidden construct and continue with an honest approximation.
 - If visual feedback is missing from `run_experiment`, do not read the artifact images directly. Treat it as a battleground bug and continue only after that bug is fixed.
-
-## autoresearch.sh
-
-Write this script with `set -euo pipefail` and have it run:
-
-```bash
-pnpm research:score
-```
-
-It must print the metric lines from that command unchanged.
 
 ## Never stop
 

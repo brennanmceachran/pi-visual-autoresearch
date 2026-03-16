@@ -129,10 +129,7 @@ export function buildPreviewDocument(input: {
         margin: 0;
         width: 100%;
         height: 100%;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 238, 227, 0.92)),
-          radial-gradient(circle at top right, rgba(255, 160, 55, 0.22), transparent 38%);
-        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        background: #ffffff;
       }
 
       body {
@@ -146,7 +143,6 @@ export function buildPreviewDocument(input: {
         place-items: center;
         width: 100%;
         height: 100%;
-        padding: 18px;
       }
 
       .preview-frame {
@@ -176,14 +172,7 @@ export function buildPreviewDocument(input: {
         height: var(--stage-height);
         overflow: hidden;
         isolation: isolate;
-        border: 1px solid rgba(33, 24, 13, 0.12);
-        border-radius: 28px;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 244, 236, 0.9)),
-          linear-gradient(90deg, rgba(28, 21, 12, 0.04) 1px, transparent 1px),
-          linear-gradient(rgba(28, 21, 12, 0.04) 1px, transparent 1px);
-        background-size: auto, 24px 24px, 24px 24px;
-        box-shadow: 0 28px 90px rgba(46, 28, 5, 0.18);
+        background: #ffffff;
       }
 
 ${compiledCss}
@@ -200,7 +189,7 @@ ${compiledCss}
     <script>
       const stageWidth = ${stage.width};
       const stageHeight = ${stage.height};
-      const chromePadding = 36;
+      const chromePadding = 0;
 
       function updatePreviewScale() {
         const availableWidth = Math.max(window.innerWidth - chromePadding, 1);

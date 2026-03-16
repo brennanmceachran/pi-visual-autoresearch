@@ -2,6 +2,8 @@ import { isAbsolute, relative, resolve } from "node:path";
 
 import {
   ARTIFACTS_DIR,
+  AUTORESEARCH_IDEAS_PATH,
+  AUTORESEARCH_NOTES_PATH,
   CANDIDATE_CSS_PATH,
   CANDIDATE_HTML_PATH,
   ROOT_DIR,
@@ -14,8 +16,8 @@ const PROTECTED_PATHS = new Map([[TARGET_INFO_PATH, "target metadata"]]);
 const WRITABLE_PATHS = new Set([
   CANDIDATE_HTML_PATH,
   CANDIDATE_CSS_PATH,
-  resolve(ROOT_DIR, "autoresearch.md"),
-  resolve(ROOT_DIR, "autoresearch.ideas.md")
+  AUTORESEARCH_NOTES_PATH,
+  AUTORESEARCH_IDEAS_PATH
 ]);
 
 const PROTECTED_DIRECTORIES = [

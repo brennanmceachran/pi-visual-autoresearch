@@ -1,0 +1,8 @@
+{
+  "name": "pi-visual-autoresearch-arena",
+  "private": true,
+  "scripts": {
+    "research:score": "pnpm -C .. research:score",
+    "battleground:reset": "pnpm -C .. battleground:reset"
+  }
+}
