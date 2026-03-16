@@ -224,7 +224,7 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
     }
 
     try {
-      const eventTime = new Date(event.timestamp).getTime();
+      const eventTime = Date.now();
       const durationMs = Math.max(0, (details.durationSeconds ?? 0) * 1000);
       const minGeneratedAt = Number.isFinite(eventTime)
         ? eventTime - durationMs - 2_000

@@ -51,9 +51,9 @@ This project uses these tools directly:
    - `commit`: current `HEAD` short SHA before logging
    - `metric`: `similarity`
    - `metrics`: include `difference` and `evaluation_ms`
-   - `status`: `keep`, `discard`, or `crash`
+   - `status`: `keep`, `discard`, `crash`, or `checks_failed` if the tool reports a failed checks phase
    - `description`: one-line summary of the attempted change
-6. Do not manually commit before `log_experiment`. On `keep`, the tool handles the git commit itself.
+6. Do not manually commit or manually revert before `log_experiment`. On `keep`, the tool handles the git commit itself. On `discard`, `crash`, and `checks_failed`, the tool auto-reverts code changes.
 
 ## Metrics
 
@@ -97,8 +97,10 @@ Interpretation:
 ## Logging rules
 
 - If the command succeeds and similarity improved over the best current keep, use `status: keep`.
-- If the command succeeds but similarity did not improve, use `status: discard` and then revert with `git checkout -- .`.
-- If the command crashes, use `status: crash`, then revert with `git checkout -- .`.
+- If the command succeeds but similarity did not improve, use `status: discard`.
+- If the command crashes, use `status: crash`.
+- If the command reports that correctness checks failed after a passing benchmark, use `status: checks_failed`.
+- Do not manually revert after logging one of these non-keep statuses. The tool handles the revert.
 
 ## Strategy
 
