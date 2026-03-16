@@ -5,7 +5,6 @@ import type {
 } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 
-import { ROOT_DIR } from "../../src/lib/paths.js";
 import { buildScoreFeedbackBlocks } from "../../src/lib/research-feedback.js";
 import { updateRuntimeStatus } from "../../src/lib/runtime-status.js";
 import {
@@ -122,7 +121,7 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
       if (reason) {
         return block(`Listing blocked: ${reason}.`);
       }
-      if (absolutePath !== ROOT_DIR && pathMayTraverseProtected(absolutePath)) {
+      if (pathMayTraverseProtected(absolutePath)) {
         return block("Listing directories that contain protected battleground paths is blocked.");
       }
       return;

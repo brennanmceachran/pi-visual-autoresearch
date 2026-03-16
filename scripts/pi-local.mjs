@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const arenaDir = resolve(root, "arena");
+const arenaSkillsDir = resolve(arenaDir, ".pi", "skills");
 const agentDir = resolve(root, ".pi", "agent");
 const sessionsDir = resolve(root, ".pi", "sessions");
 const extensionsDir = resolve(root, ".pi", "extensions");
@@ -23,6 +24,7 @@ const extensionArgs = readdirSync(extensionsDir, { withFileTypes: true })
 
 mkdirSync(agentDir, { recursive: true });
 mkdirSync(arenaDir, { recursive: true });
+mkdirSync(arenaSkillsDir, { recursive: true });
 mkdirSync(sessionsDir, { recursive: true });
 mkdirSync(runtimeDir, { recursive: true });
 
@@ -91,7 +93,7 @@ const args = [
   "pi",
   "--no-skills",
   "--skill",
-  resolve(root, ".pi", "skills"),
+  arenaSkillsDir,
   "--no-extensions",
   ...extensionArgs,
   "--session-dir",
