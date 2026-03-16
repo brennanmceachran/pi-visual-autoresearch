@@ -44,6 +44,12 @@ function defaultRuntimeStatus() {
       activatedAt: null,
       lastEventAt: null,
       eventName: null
+    },
+    experiment: {
+      state: "idle",
+      startedAt: null,
+      lastCompletedAt: null,
+      lastDurationMs: null
     }
   };
 }
@@ -61,6 +67,10 @@ function readRuntimeStatus() {
       skill: {
         ...defaultRuntimeStatus().skill,
         ...(raw.skill ?? {})
+      },
+      experiment: {
+        ...defaultRuntimeStatus().experiment,
+        ...(raw.experiment ?? {})
       }
     };
   } catch {
@@ -80,6 +90,10 @@ function writeRuntimeStatus(update) {
     skill: {
       ...current.skill,
       ...(update.skill ?? {})
+    },
+    experiment: {
+      ...current.experiment,
+      ...(update.experiment ?? {})
     },
     updatedAt: new Date().toISOString()
   };
@@ -125,6 +139,12 @@ writeRuntimeStatus({
     activatedAt: null,
     lastEventAt: null,
     eventName: null
+  },
+  experiment: {
+    state: "idle",
+    startedAt: null,
+    lastCompletedAt: null,
+    lastDurationMs: null
   }
 });
 
@@ -160,6 +180,10 @@ child.on("error", () => {
       startedAt,
       heartbeatAt: null,
       exitedAt: new Date().toISOString()
+    },
+    experiment: {
+      state: "idle",
+      startedAt: null
     }
   });
 });
@@ -173,6 +197,10 @@ child.on("exit", (code, signal) => {
       startedAt,
       heartbeatAt: null,
       exitedAt: new Date().toISOString()
+    },
+    experiment: {
+      state: "idle",
+      startedAt: null
     }
   });
   if (signal) {

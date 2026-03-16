@@ -1,38 +1,44 @@
 # Pi Visual Autoresearch Arena
 
-This folder is the agent workspace for the visual battleground.
+This folder is the agent workspace for the visual battleground. Treat it as the default project root for optimization work.
 
-## Primary goal
+## Goal
 
 Optimize the visual similarity score between the active private target image and the rendered component defined by:
 
 - `candidate.html`
 - `candidate.css`
 
-## Normal workflow
+## Workspace facts
 
-1. Read this file plus `candidate.html` and `candidate.css`.
-2. Use the upstream autoresearch tools:
-   - `init_experiment`
-   - `run_experiment`
-   - `log_experiment`
-3. For `run_experiment`, use `pnpm research:score`.
-4. Use the `run_experiment` result itself as the feedback surface:
-   - score and metric text
-   - attached target image
-   - attached candidate capture
-   - attached diff heatmap
-5. Edit only the candidate files unless a change to the battleground itself is explicitly requested.
+- The scorer already provides a fixed stage at the current target dimensions. Build to fill that frame directly.
+- `pnpm research:score` is the battleground experiment command. The local skill explains how to run it through the experiment tools.
+- The scored truth surface is the candidate capture returned by the scorer, not any ad hoc browser tab state.
+- Files outside this folder are battleground infrastructure. Only touch them when the user explicitly asks for battleground implementation work.
 
-## Guardrails
+## Diff interpretation
 
-- Stay inside this `arena/` workspace unless the user explicitly asks for battleground infrastructure changes.
-- Do not inspect or modify private battleground paths such as `../.pi/private/targets/`, `../.pi/sessions/`, `../data/target.json`, or `../.artifacts/`.
+- Treat the diff image as a penalty map, not just a visual overlay.
+- Transparent pixels are effectively free: they either matched within tolerance or were ignored as background/transparent.
+- Blue pixels are slight misses just over tolerance.
+- Green pixels are moderate misses.
+- Yellow and orange pixels are large misses.
+- Red pixels are the highest-penalty misses and should be fixed first.
+- If one side has a visible pixel and the other side is effectively background/transparent, that is a severe miss.
+- If the heatmap is noisy across the whole frame, fix scale, framing, and major layout first.
+- If the heatmap is concentrated in a few hot regions, focus on those regions before polishing anything else.
+
+## Files you may edit by default
+
+- `candidate.html`
+- `candidate.css`
+
+## Boundaries
+
 - Treat `candidate.html` as the primary editable surface. Keep structure simple and deterministic.
 - Use Tailwind utility classes in `candidate.html` when possible. Use `candidate.css` for anything custom that would be awkward in utilities.
-- The rendered component should fit the full target frame. The evaluator sets the stage size from the current target dimensions.
+- Do not use private battleground state or scorer artifacts as visual inputs or asset sources.
 - Avoid animations, timers, and random values in the candidate.
 - Never embed or fetch the target image or scorer artifacts. Honest reconstruction may use normal DOM, CSS, SVG, canvas, or script primitives, but must not depend on private battleground paths, network fetches, or `data:` URIs.
-- If asset loading is attempted, the evaluator will block network/private-path requests. Treat that as a cue to reconstruct honestly rather than trying another fetch path.
 - If the evaluator reports a validation failure, rewrite the candidate honestly instead of trying to bypass the rule.
-- Never fall back to reading artifact images directly. If visual feedback is missing from `run_experiment`, treat that as a battleground bug rather than reading `../.artifacts/latest/*.png`.
+- If visual feedback is missing from `run_experiment`, treat it as a battleground bug instead of reading artifact files directly.

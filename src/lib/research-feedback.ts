@@ -69,7 +69,7 @@ export async function buildScoreFeedbackBlocks(input?: {
     {
       type: "text",
       text:
-        "Visual feedback from this successful scorer run is attached below. Use the target, candidate capture, and diff heatmap to guide the next honest reconstruction. Lower diff is better."
+        "Visual feedback from this successful scorer run is attached below. Use the target, candidate capture, and diff heatmap to guide the next honest reconstruction. Lower diff is better. Diff heatmap reminder: transparent means no visible penalty, blue and green mean smaller penalties, yellow and red mean larger penalties. Fix the hottest red regions first; if the whole frame is noisy, fix layout, scale, and alignment first."
     }
   ];
 

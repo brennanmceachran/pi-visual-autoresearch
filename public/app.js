@@ -170,14 +170,16 @@ function formatSummaryTimestamp(value) {
 
 function renderLiveTimers(appState) {
   const target = appState?.target;
-  const historyRuns = appState?.history?.runs ?? [];
-  const latestRun = historyRuns[historyRuns.length - 1] ?? null;
+  const runtimeExperiment = appState?.runtime?.experiment ?? null;
   const targetTimestamp = target ? new Date(target.updatedAt).getTime() : null;
-  const currentRunStart = latestRun?.timestamp ?? targetTimestamp;
 
   const totalTimeMs =
     typeof targetTimestamp === "number" && Number.isFinite(targetTimestamp)
       ? Math.max(Date.now() - targetTimestamp, 0)
+      : null;
+  const currentRunStart =
+    runtimeExperiment?.state === "running" && runtimeExperiment.startedAt
+      ? new Date(runtimeExperiment.startedAt).getTime()
       : null;
   const currentRunMs =
     typeof currentRunStart === "number" && Number.isFinite(currentRunStart)

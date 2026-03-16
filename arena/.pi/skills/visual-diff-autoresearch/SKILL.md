@@ -11,31 +11,49 @@ Use this skill for the current battleground workspace.
 
 Improve the visual similarity score reported by `pnpm research:score` for the current target image.
 
-## Editable files
+## Files you may edit by default
 
 - `candidate.html`
 - `candidate.css`
 
-Do not inspect or edit private battleground paths outside this workspace unless the user explicitly asks for battleground infrastructure changes.
+Do not inspect or edit battleground infrastructure or private scorer state unless the user explicitly asks for battleground implementation work.
 
-## Workflow
+## Core loop
+
+This project uses these tools directly:
+
+- `init_experiment`
+- `run_experiment`
+- `log_experiment`
+
+`pnpm research:score` is not a separate tool. It is the command you pass into `run_experiment`.
+
+## Step-by-step workflow
 
 1. Read:
    - `AGENTS.md`
    - `candidate.html`
    - `candidate.css`
-2. If there is no git branch for the run yet, create one:
-   - `git checkout -b autoresearch/visual-diff-$(date +%Y%m%d-%H%M%S)`
-3. Initialize the loop:
-   - `init_experiment`
-     - `name`: `Visual diff battleground`
-     - `metric_name`: `similarity`
-     - `metric_unit`: `%`
-     - `direction`: `higher`
-4. Run the baseline:
-   - `run_experiment` with `pnpm research:score`
-   - use the attached scorer images in the `run_experiment` result instead of reading artifact files
-5. Parse the `METRIC name=value` lines from stdout and call `log_experiment`.
+   - if present, `autoresearch.jsonl`
+2. If `autoresearch.jsonl` is missing in the current folder, call `init_experiment` with:
+   - `name: "Visual diff battleground"`
+   - `metric_name: "similarity"`
+   - `metric_unit: "%"`
+   - `direction: "higher"`
+3. Call `run_experiment` with exactly:
+   - `command: "pnpm research:score"`
+   - `timeout_seconds: 600`
+4. Parse the `METRIC name=value` lines from the returned stdout:
+   - `similarity`
+   - `difference`
+   - `evaluation_ms`
+5. Call `log_experiment` after every `run_experiment`:
+   - `commit`: current `HEAD` short SHA before logging
+   - `metric`: `similarity`
+   - `metrics`: include `difference` and `evaluation_ms`
+   - `status`: `keep`, `discard`, or `crash`
+   - `description`: one-line summary of the attempted change
+6. Do not manually commit before `log_experiment`. On `keep`, the tool handles the git commit itself.
 
 ## Metrics
 
@@ -43,6 +61,38 @@ Do not inspect or edit private battleground paths outside this workspace unless 
 - Secondary:
   - `difference`
   - `evaluation_ms`
+
+## What `run_experiment` returns
+
+The `run_experiment("pnpm research:score")` result is the main feedback surface for the loop.
+
+You will get back:
+
+- A text block with pass/fail state, runtime, recent scorer output, and `METRIC ...` lines.
+- `Target image`
+  - the visual goal you are trying to match
+- `Candidate capture`
+  - the exact screenshot the scorer judged for this run
+  - trust this more than any separate manual preview
+- `Diff heatmap`
+  - this is a penalty map, not just a change overlay
+  - transparent pixels mean either a match within tolerance or ignored background/transparent pixels
+  - blue pixels are slight misses just over tolerance
+  - green pixels are moderate misses
+  - yellow and orange pixels are large misses
+  - red pixels are the highest-penalty misses
+  - use the hottest regions first when choosing the next edit
+
+In practice, the call looks like:
+
+- `run_experiment(command="pnpm research:score", timeout_seconds=600)`
+
+Interpretation:
+
+- If the candidate capture is framed, sized, or positioned wrong, fix layout before cosmetic details.
+- If one side has visible content and the other side is effectively background/transparent, treat that as a severe miss.
+- If the heatmap is concentrated in a few regions, those regions should dominate the next edit.
+- If the heatmap is broadly noisy everywhere, simplify and realign the overall structure first.
 
 ## Logging rules
 
@@ -61,7 +111,3 @@ Do not inspect or edit private battleground paths outside this workspace unless 
 - If an asset request is blocked by the evaluator, do not try alternate fetch paths. Reconstruct the frame honestly instead.
 - If the evaluator reports a validation failure, remove the forbidden construct and continue with an honest approximation.
 - If visual feedback is missing from `run_experiment`, do not read artifact images directly. Treat it as a battleground bug and continue only after that bug is fixed.
-
-## Never stop
-
-Once the baseline is recorded, keep iterating until interrupted.

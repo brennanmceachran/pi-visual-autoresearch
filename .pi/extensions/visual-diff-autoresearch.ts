@@ -51,6 +51,37 @@ function appendToolResultNote(
   return [noteBlock, ...nextContent];
 }
 
+async function markExperimentRunning() {
+  const now = new Date().toISOString();
+  await updateRuntimeStatus((current) => ({
+    ...current,
+    experiment: {
+      ...current.experiment,
+      state: "running",
+      startedAt: now
+    }
+  }));
+}
+
+async function markExperimentIdle(details?: RunExperimentDetails) {
+  const now = new Date().toISOString();
+  const durationMs =
+    typeof details?.durationSeconds === "number" && Number.isFinite(details.durationSeconds)
+      ? Math.max(0, Math.round(details.durationSeconds * 1000))
+      : null;
+
+  await updateRuntimeStatus((current) => ({
+    ...current,
+    experiment: {
+      ...current.experiment,
+      state: "idle",
+      startedAt: null,
+      lastCompletedAt: now,
+      lastDurationMs: durationMs ?? current.experiment.lastDurationMs
+    }
+  }));
+}
+
 async function markSkillActive(eventName: string) {
   const now = new Date().toISOString();
   await updateRuntimeStatus((current) => ({
@@ -95,6 +126,23 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
       event.toolName === "log_experiment"
     ) {
       await markSkillActive(event.toolName);
+    }
+
+    if (event.toolName === "init_experiment") {
+      await updateRuntimeStatus((current) => ({
+        ...current,
+        experiment: {
+          ...current.experiment,
+          state: "idle",
+          startedAt: null,
+          lastCompletedAt: null,
+          lastDurationMs: null
+        }
+      }));
+    }
+
+    if (event.toolName === "run_experiment") {
+      await markExperimentRunning();
     }
 
     if (isToolCallEventType("read", event)) {
@@ -158,6 +206,7 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
     if (event.input.command.trim() !== "pnpm research:score") return;
 
     const details = (event.details ?? {}) as RunExperimentDetails;
+    await markExperimentIdle(details);
     const passed =
       event.isError !== true &&
       details.passed === true &&

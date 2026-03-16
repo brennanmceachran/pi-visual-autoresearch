@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 
 import { RUNTIME_STATUS_PATH } from "./paths.js";
 
-const RUNTIME_STATUS_VERSION = 1;
+const RUNTIME_STATUS_VERSION = 2;
 const PI_STALE_AFTER_MS = 12_000;
 
 export type RuntimeStatus = {
@@ -21,6 +21,12 @@ export type RuntimeStatus = {
     activatedAt: string | null;
     lastEventAt: string | null;
     eventName: string | null;
+  };
+  experiment: {
+    state: "idle" | "running";
+    startedAt: string | null;
+    lastCompletedAt: string | null;
+    lastDurationMs: number | null;
   };
 };
 
@@ -62,6 +68,12 @@ function createDefaultRuntimeStatus(): RuntimeStatus {
       activatedAt: null,
       lastEventAt: null,
       eventName: null
+    },
+    experiment: {
+      state: "idle",
+      startedAt: null,
+      lastCompletedAt: null,
+      lastDurationMs: null
     }
   };
 }
@@ -86,6 +98,7 @@ function normalizeRuntimeStatus(input: unknown): RuntimeStatus {
 
   const pi = isRecord(input.pi) ? input.pi : {};
   const skill = isRecord(input.skill) ? input.skill : {};
+  const experiment = isRecord(input.experiment) ? input.experiment : {};
   const piState =
     pi.state === "waiting" ||
     pi.state === "starting" ||
@@ -97,6 +110,10 @@ function normalizeRuntimeStatus(input: unknown): RuntimeStatus {
     skill.state === "waiting" || skill.state === "active"
       ? skill.state
       : defaults.skill.state;
+  const experimentState =
+    experiment.state === "idle" || experiment.state === "running"
+      ? experiment.state
+      : defaults.experiment.state;
 
   return {
     version: RUNTIME_STATUS_VERSION,
@@ -113,6 +130,12 @@ function normalizeRuntimeStatus(input: unknown): RuntimeStatus {
       activatedAt: readStringOrNull(skill.activatedAt),
       lastEventAt: readStringOrNull(skill.lastEventAt),
       eventName: readStringOrNull(skill.eventName)
+    },
+    experiment: {
+      state: experimentState,
+      startedAt: readStringOrNull(experiment.startedAt),
+      lastCompletedAt: readStringOrNull(experiment.lastCompletedAt),
+      lastDurationMs: readNumberOrNull(experiment.lastDurationMs)
     }
   };
 }
@@ -175,6 +198,7 @@ export function buildLaunchSetup(input: {
   const piLoading = hasTarget && input.runtime.pi.state === "starting" && piFresh;
   const skillReady = piReady && input.runtime.skill.state === "active";
   const skillLoading = piReady && !skillReady;
+  const piStopped = hasTarget && input.runtime.pi.state === "stopped";
 
   const headline = !hasTarget
     ? "Upload a target to start a new battleground session."
@@ -182,7 +206,9 @@ export function buildLaunchSetup(input: {
       ? "Live target locked. Pi can keep iterating while the curve settles."
       : piReady
         ? "Pi is running. Start the local skill to begin the loop."
-        : "Target loaded. Start Pi to begin the loop.";
+        : piStopped
+          ? "Pi stopped. Run it again to continue the loop."
+          : "Target loaded. Start Pi to begin the loop.";
 
   return {
     headline,
@@ -202,14 +228,18 @@ export function buildLaunchSetup(input: {
           ? "running"
           : piLoading
             ? "starting…"
-            : "pnpm pi"
+            : piStopped
+              ? "stopped"
+              : "pnpm pi"
     },
     skill: {
       state: !hasTarget ? "waiting" : skillReady ? "ready" : skillLoading ? "loading" : "waiting",
       meta: !hasTarget
         ? "waiting for target"
         : !piReady
-          ? "waiting for Pi"
+          ? piStopped
+            ? "idle"
+            : "waiting for Pi"
           : skillReady
             ? "active"
             : "/skill:visual-diff-autoresearch"

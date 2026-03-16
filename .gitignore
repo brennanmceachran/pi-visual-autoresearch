@@ -6,6 +6,7 @@ node_modules
 data/target.json
 .pi/agent/
 .pi/private/
+.pi/runtime/status.json
 .pi/sessions/
 playwright-report/
 test-results/

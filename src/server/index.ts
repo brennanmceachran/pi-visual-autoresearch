@@ -129,6 +129,7 @@ async function getAppState() {
           },
     report,
     history,
+    runtime,
     setup: buildLaunchSetup({
       host: HOST,
       port: PORT,
