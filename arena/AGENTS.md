@@ -9,11 +9,15 @@ Optimize the visual similarity score between the active private target image and
 - `candidate.html`
 - `candidate.css`
 
+Drive `difference` as close to `0` as possible and `similarity` as close to `100` as possible.
+Do not stop at "good enough" while credible improvements still exist.
+
 ## Workspace facts
 
 - The scorer already provides a fixed stage at the current target dimensions. Build to fill that frame directly.
 - `pnpm research:score` is the battleground experiment command. The local skill explains how to run it through the experiment tools.
 - The scored truth surface is the candidate capture returned by the scorer, not any ad hoc browser tab state.
+- The source of truth for progress is `run_experiment("pnpm research:score")`, not eyeballing the page.
 - Files outside this folder are battleground infrastructure. Only touch them when the user explicitly asks for battleground implementation work.
 
 ## Diff interpretation
@@ -27,6 +31,7 @@ Optimize the visual similarity score between the active private target image and
 - If one side has a visible pixel and the other side is effectively background/transparent, that is a severe miss.
 - If the heatmap is noisy across the whole frame, fix scale, framing, and major layout first.
 - If the heatmap is concentrated in a few hot regions, focus on those regions before polishing anything else.
+- After each meaningful edit, validate by running the experiment again. Do not assume an edit helped until the scorer says it did.
 
 ## Files you may edit by default
 

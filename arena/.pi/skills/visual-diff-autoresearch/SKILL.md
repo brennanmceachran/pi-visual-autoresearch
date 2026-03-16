@@ -10,6 +10,8 @@ Use this skill for the current battleground workspace.
 ## Objective
 
 Improve the visual similarity score reported by `pnpm research:score` for the current target image.
+Push `difference` toward `0` and `similarity` toward `100`.
+Do not stop early just because the result looks decent; keep iterating while credible improvements remain.
 
 ## Files you may edit by default
 
@@ -27,6 +29,7 @@ This project uses these tools directly:
 - `log_experiment`
 
 `pnpm research:score` is not a separate tool. It is the command you pass into `run_experiment`.
+`run_experiment("pnpm research:score")` is the source of truth for whether a change helped.
 
 ## Step-by-step workflow
 
@@ -93,6 +96,7 @@ Interpretation:
 - If one side has visible content and the other side is effectively background/transparent, treat that as a severe miss.
 - If the heatmap is concentrated in a few regions, those regions should dominate the next edit.
 - If the heatmap is broadly noisy everywhere, simplify and realign the overall structure first.
+- Keep pushing until interrupted or until you genuinely run out of credible ideas that can move the score.
 
 ## Logging rules
 
@@ -106,6 +110,7 @@ Interpretation:
 
 - Keep the markup deterministic and frame-filling.
 - Prefer simple geometric reconstruction first: large blocks, background, major shapes, text bands.
+- After each meaningful change, validate with `run_experiment` rather than trusting eyeballing alone.
 - Use Tailwind utility classes in `candidate.html` for rapid iteration.
 - Use `candidate.css` only for custom gradients, masks, or effects that are awkward in Tailwind.
 - Avoid animation, filters that depend on browser timing, and anything random.
