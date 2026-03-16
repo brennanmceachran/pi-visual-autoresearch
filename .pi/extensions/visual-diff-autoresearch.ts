@@ -111,12 +111,45 @@ type RunExperimentDetails = {
 };
 
 export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
+  let recoveringFromOversizeFailure = false;
+
   pi.on("session_start", async () => {
     applyActiveTools(pi);
   });
 
   pi.on("session_switch", async () => {
     applyActiveTools(pi);
+  });
+
+  pi.on("turn_end", async (event, ctx) => {
+    const message = event.message;
+    if (message.role !== "assistant") return;
+    if (message.stopReason !== "error") return;
+    if (!/413 failed to parse request/i.test(message.errorMessage ?? "")) return;
+    if (recoveringFromOversizeFailure) return;
+
+    recoveringFromOversizeFailure = true;
+    if (ctx.hasUI) {
+      ctx.ui.notify("Compacting after oversized autoresearch turn", "info");
+    }
+
+    ctx.compact({
+      customInstructions:
+        "Preserve the current battleground state, latest experiment results, git status, and the next most promising visual changes. Keep the summary tight.",
+      onComplete: () => {
+        recoveringFromOversizeFailure = false;
+        pi.sendUserMessage("continue");
+      },
+      onError: (error) => {
+        recoveringFromOversizeFailure = false;
+        if (ctx.hasUI) {
+          ctx.ui.notify(
+            `Automatic compaction failed after oversized turn: ${error.message}`,
+            "error"
+          );
+        }
+      }
+    });
   });
 
   pi.on("tool_call", async (event, ctx) => {
