@@ -51,7 +51,9 @@ This project uses these tools directly:
    - `difference`
    - `evaluation_ms`
 5. Call `log_experiment` after every `run_experiment`:
-   - `commit`: current `HEAD` short SHA before logging
+   - `commit`: current workspace `HEAD` short SHA
+     - if you need it, read `.git/HEAD` and the referenced ref file from this workspace
+     - do not use `run_experiment` for git commands
    - `metric`: `similarity`
    - `metrics`: include `difference` and `evaluation_ms`
    - `status`: `keep`, `discard`, `crash`, or `checks_failed` if the tool reports a failed checks phase

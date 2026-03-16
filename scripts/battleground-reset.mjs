@@ -1,6 +1,8 @@
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const arenaDir = join(root, "arena");
@@ -64,6 +66,26 @@ async function clearDirectory(directory, keep = []) {
   }
 }
 
+function commitArenaBaseline() {
+  const gitDir = join(arenaDir, ".git");
+  if (!existsSync(gitDir)) return;
+
+  execFileSync("git", ["-C", arenaDir, "clean", "-fd"], { stdio: "pipe" });
+  execFileSync("git", ["-C", arenaDir, "add", "-A"], { stdio: "pipe" });
+
+  try {
+    execFileSync("git", ["-C", arenaDir, "diff", "--cached", "--quiet"], {
+      stdio: "pipe"
+    });
+  } catch {
+    execFileSync(
+      "git",
+      ["-C", arenaDir, "commit", "-m", "Reset battleground workspace"],
+      { stdio: "pipe" }
+    );
+  }
+}
+
 await Promise.all(resettableFiles.map((path) => rm(path, { force: true })));
 await mkdir(arenaDir, { recursive: true });
 await Promise.all([
@@ -76,7 +98,8 @@ await Promise.all([
   clearDirectory(privateTargetsDir),
   clearDirectory(legacyTargetsDir)
 ]);
+commitArenaBaseline();
 
 console.log(
-  "Battleground reset: cleared target, candidate DOM, experiments, artifacts, and Pi sessions."
+  "Battleground reset: cleared target, candidate DOM, experiments, artifacts, Pi sessions, and reset the arena git workspace."
 );

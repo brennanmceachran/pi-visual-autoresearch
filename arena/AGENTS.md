@@ -15,6 +15,7 @@ Do not stop at "good enough" while credible improvements still exist.
 ## Workspace facts
 
 - The scorer already provides a fixed stage at the current target dimensions. Build to fill that frame directly.
+- This folder is a standalone git workspace for the experiment loop. Keep, discard, crash, and checks-failed outcomes apply to this workspace.
 - `pnpm research:score` is the battleground experiment command. The local skill explains how to run it through the experiment tools.
 - The scored truth surface is the candidate capture returned by the scorer, not any ad hoc browser tab state.
 - The source of truth for progress is `run_experiment("pnpm research:score")`, not eyeballing the page.

@@ -1,77 +1,192 @@
 # Pi Visual Autoresearch
 
-Local battleground for Pi's autoresearch loop. You upload a target image, Pi works inside `arena/`, and the score is the visual similarity between the rendered component and that target.
+Turn Pi into a visual-diff grinder.
 
-## What is here
+Upload a target image, let Pi work inside a tiny `arena/` workspace, and watch it push HTML/CSS toward the highest similarity score it can find.
 
-- `arena/candidate.html` and `arena/candidate.css`
-  Pi's editable surface. Use HTML plus Tailwind utility classes, with optional custom CSS.
-- `arena/package.json`
-  Tiny local wrapper so `run_experiment("pnpm research:score")` works from the agent workspace.
-- `.pi/extensions/pi-autoresearch.ts`
-  Vendored upstream autoresearch extension from `davebcn87/pi-autoresearch`.
-- `.pi/skills/`
-  Local-only Pi skills, including the upstream generic skill and a project-specific `visual-diff-autoresearch` skill.
-- `src/server/`
-  Local battleground server for uploads, previewing, and inspecting score history.
-- `src/research/score.ts`
-  Headless evaluator that Playwright uses for the actual metric.
+This repo is a local battleground built on Pi's experiment loop:
+
+- live dashboard for target, scored candidate, diff curve, and run history
+- local-only Pi setup with no global skill or extension pollution
+- agent workspace isolated to `arena/`
+- successful experiment runs feed the agent:
+  - score text
+  - target image
+  - candidate capture
+  - diff heatmap
+- resettable battleground for running fresh optimization loops against new images
+
+## Why this is interesting
+
+This is basically a CSS battle harness for a coding agent.
+
+The agent edits two files:
+
+- `arena/candidate.html`
+- `arena/candidate.css`
+
+Then it validates changes by calling the experiment tools and running:
+
+```text
+run_experiment(command="pnpm research:score", timeout_seconds=600)
+```
+
+That score run renders the candidate, compares it to the uploaded target, and returns the result back into the loop.
+
+## What the battleground does
+
+1. You upload a target image in the local UI.
+2. Pi starts in `arena/` and uses the battleground skill.
+3. Pi edits `candidate.html` and `candidate.css`.
+4. `pnpm research:score` renders the candidate with Playwright.
+5. The scorer compares the capture to the target and emits:
+   - `METRIC similarity=...`
+   - `METRIC difference=...`
+   - `METRIC evaluation_ms=...`
+6. The agent gets the target image, scored capture, and diff heatmap attached to the experiment result.
+7. Pi decides whether to keep or discard the run, then continues.
+
+## Scoring
+
+The scoring math is intentionally aligned with the `synhax` / MAD CSS battle engine settings:
+
+- Euclidean RGB diff
+- `colorTolerance = 30`
+- `ignoreTransparent = true`
+- `ignoreBackgroundColor = true`
+- `backgroundColorTolerance = 10`
+
+The capture pipeline here is different: this repo captures the candidate via Playwright screenshot of the battleground stage rather than the browser-side `snapdom` pipeline used in `synhax`.
+
+That means the important part is the same:
+
+- the numeric compare settings match
+- the agent is optimizing against the same style of diff humans are scored against
+
+## Diff heatmap semantics
+
+The diff image is a penalty map, not just an overlay.
+
+- transparent: no visible penalty for that pixel
+- blue: slight miss just over tolerance
+- green: moderate miss
+- yellow/orange: large miss
+- red: worst miss, fix these first
+
+If the whole frame is noisy, fix scale, framing, and structure before details.
+If only a few regions are hot, focus there first.
 
 ## Quick start
 
-1. Install dependencies:
+Install dependencies:
 
 ```bash
 pnpm install
 pnpm exec playwright install chromium
 ```
 
-2. Start the battleground:
+Start the battleground:
 
 ```bash
 pnpm battleground
 ```
 
-3. Open `http://127.0.0.1:4242`, upload a target image, then inspect the target, latest candidate capture, and diff heatmap.
+Open:
 
-4. Start Pi in local-only mode:
+```text
+http://127.0.0.1:4242
+```
+
+Upload a target image, then start Pi:
 
 ```bash
 pnpm pi
 ```
 
-Then run:
+Inside Pi:
 
 ```text
 /skill:visual-diff-autoresearch
 ```
 
-Or launch straight into the loop:
+Or launch Pi directly into the battleground flow:
 
 ```bash
 pnpm research:agent
 ```
 
-When you are done with the local battleground server:
+## Commands
 
 ```bash
-pnpm battleground:stop
+pnpm battleground        # start the local UI/server
+pnpm battleground:stop   # stop the local UI/server
+pnpm battleground:reset  # wipe target, sessions, logs, artifacts, and reset the arena baseline
+pnpm pi                  # start Pi in local-only battleground mode
+pnpm research:agent      # start Pi with the battleground skill prompt
+pnpm research:score      # run one scoring pass manually
+pnpm typecheck           # typecheck the repo
 ```
 
-## Reset
+## Repo layout
 
-To start a completely fresh battleground for a new target:
+```text
+arena/
+  candidate.html         # primary editable surface
+  candidate.css          # custom CSS surface
+  AGENTS.md              # workspace rules for the optimization agent
+  .pi/skills/...         # battleground skill
 
-```bash
-pnpm battleground:reset
+.pi/extensions/
+  pi-autoresearch.ts     # vendored experiment-loop extension
+  visual-diff-autoresearch.ts
+                         # battleground hook layer: guardrails + scorer image attachments
+
+src/research/score.ts    # one-shot scoring entrypoint
+src/lib/evaluator.ts     # render + compare + artifact generation
+src/server/              # battleground UI/API
+public/                  # battleground frontend
+scripts/pi-local.mjs     # local-only Pi launcher
 ```
 
-This clears the uploaded target, resets `arena/candidate.html` and `arena/candidate.css`, removes experiment history and artifacts, and wipes local Pi sessions for this repo.
+## Local-only Pi setup
 
-## Notes
+This repo does not rely on your global Pi config.
 
-- Pi is launched with `PI_CODING_AGENT_DIR` set to this repo's `.pi/agent`, and with `--no-skills` / `--no-extensions` so it does not pull in global user skills or extensions.
-- Pi now starts with its working directory set to `arena/`, so searches and edits stay inside the battleground workspace by default.
-- The evaluator writes artifacts to `.artifacts/latest/`. These are ignored by git so the autoresearch loop does not accidentally commit screenshots.
-- `autoresearch.jsonl` is intentionally ignored so experiment history survives `git checkout -- .` reverts.
-- The scorer rejects cheating candidates. Embedded target pixels, fetches, `data:` URIs, asset tags, and non-fragment CSS `url(...)` references all fail before scoring.
+`pnpm pi` launches Pi with:
+
+- repo-local agent state
+- repo-local skills
+- repo-local extensions
+- working directory set to `arena/`
+
+That keeps the battleground reproducible and avoids dumping project-specific skills into global user folders.
+
+## Anti-cheat boundary
+
+The battleground is built for honest reconstruction, not pixel import tricks.
+
+Current protections:
+
+- `data:` URIs are rejected
+- `iframe`, `frame`, `object`, and `embed` are rejected
+- external runtime resource loads are blocked during scoring
+- the scorer only attaches fresh images for successful experiment runs
+
+Honest reconstruction can still use normal DOM, CSS, SVG, canvas, and script primitives.
+
+## Good targets
+
+This setup works best on:
+
+- CSS battle prompts
+- dashboards
+- posters
+- hero sections
+- tightly framed UI screenshots
+- image targets where structure and layout matter more than photography
+
+## References
+
+- Pi: https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent
+- Autoresearch plugin: https://github.com/davebcn87/pi-autoresearch
+- Synhax diff engine: https://github.com/syntaxfm/synhax/blob/main/src/utils/diff.ts
