@@ -57,16 +57,17 @@ code {
 }
 
 .launch-shell {
-  padding: 14px 18px 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 12px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--line);
   background: var(--surface);
 }
 
 .launch-grid {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  align-items: center;
-  gap: 20px;
+  display: contents;
 }
 
 .launch-eyebrow {
@@ -95,12 +96,15 @@ code {
 
 .launch-description {
   margin: 0;
-  max-width: 52ch;
+  max-width: 34ch;
   color: var(--muted);
   font-size: 0.76rem;
   line-height: 1.4;
   text-align: right;
   justify-self: end;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .launch-slot-copy {
@@ -134,6 +138,16 @@ code {
   color: var(--accent);
 }
 
+.launch-checkline.is-loading .launch-step-icon::before {
+  content: "";
+  width: 0.78rem;
+  height: 0.78rem;
+  border: 1.5px solid rgba(17, 17, 17, 0.16);
+  border-top-color: var(--success);
+  border-radius: 999px;
+  animation: launch-spin 0.9s linear infinite;
+}
+
 .launch-step-label {
   font-size: 0.64rem;
   font-weight: 700;
@@ -161,9 +175,11 @@ code {
   display: flex;
   align-items: stretch;
   gap: 0;
-  padding: 10px 0 10px;
-  margin-top: 10px;
-  border-top: 1px solid var(--line);
+  min-width: 0;
+  padding: 0 0 0 18px;
+  margin-top: 0;
+  border-top: 0;
+  border-left: 1px solid var(--line);
   background: transparent;
 }
 
@@ -243,6 +259,10 @@ code {
   background: var(--surface-strong);
 }
 
+.launch-checkline.is-loading .launch-step-meta {
+  color: var(--text);
+}
+
 .launch-checkline-target.is-empty .launch-target-button {
   min-height: 38px;
   padding: 0.65rem 0.95rem;
@@ -259,13 +279,20 @@ code {
 
 .launch-feedback {
   margin: 0;
-  padding: 0 0 12px;
+  grid-column: 1 / -1;
+  padding: 2px 0 0;
   min-height: 1rem;
   font-size: 0.74rem;
 }
 
 .launch-feedback:empty {
   display: none;
+}
+
+@keyframes launch-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .dashboard-body {
@@ -683,10 +710,28 @@ th,
   align-items: baseline;
   gap: 4px;
   flex-wrap: wrap;
+  min-height: 1.1rem;
+}
+
+.inspection-meta-row .refresh-action::before {
+  content: "·";
+  margin-right: 0.32rem;
+  color: rgba(17, 17, 17, 0.24);
 }
 
 .inspection-head-diff {
-  align-items: stretch;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.inspection-head-diff .inspection-copy {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.inspection-head-diff .view-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .inspection-viewport {
@@ -744,20 +789,20 @@ th,
   appearance: none;
   border: 0;
   background: transparent;
-  color: var(--muted);
+  color: rgba(17, 17, 17, 0.48);
   padding: 0;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 0.69rem;
+  font-weight: 500;
   line-height: 1.2;
-  text-decoration: underline;
-  text-underline-offset: 0.14em;
+  text-decoration: none;
   cursor: pointer;
-  transition: color 140ms ease;
+  transition: color 140ms ease, opacity 140ms ease;
 }
 
 .refresh-action:hover,
 .refresh-action:focus-visible {
-  color: var(--text);
+  color: rgba(17, 17, 17, 0.68);
 }
 
 .refresh-action:disabled {
@@ -818,6 +863,15 @@ th,
     calc(var(--compare-x) * 1%) 0,
     calc(var(--compare-x) * 1%) calc(var(--compare-y) * 1%),
     0 calc(var(--compare-y) * 1%)
+  );
+}
+
+.compare-overlay-secondary {
+  clip-path: polygon(
+    calc(var(--compare-x) * 1%) calc(var(--compare-y) * 1%),
+    100% calc(var(--compare-y) * 1%),
+    100% 100%,
+    calc(var(--compare-x) * 1%) 100%
   );
 }
 
@@ -1115,9 +1169,31 @@ th,
 }
 
 @media (max-width: 1200px) {
+  .launch-shell {
+    display: block;
+    padding: 14px 18px 0;
+  }
+
+  .launch-grid {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+  }
+
+  .launch-description {
+    max-width: 52ch;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
   .launch-readiness {
     flex-wrap: wrap;
     padding: 0;
+    margin-top: 10px;
+    border-top: 1px solid var(--line);
+    border-left: 0;
   }
 
   .launch-checkline + .launch-checkline {
@@ -1265,12 +1341,6 @@ th,
 
   .inspection-head {
     padding: 16px 16px 10px;
-  }
-
-  .inspection-title-row {
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 10px;
   }
 
   .inspection-viewport {

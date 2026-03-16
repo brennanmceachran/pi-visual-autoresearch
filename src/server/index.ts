@@ -11,6 +11,7 @@ import {
 import { readLatestReport, evaluateCurrentTarget } from "../lib/evaluator.js";
 import { readHistory } from "../lib/history.js";
 import { ARTIFACTS_DIR, PUBLIC_DIR, ensureRuntimeDirs } from "../lib/paths.js";
+import { buildLaunchSetup, readRuntimeStatus } from "../lib/runtime-status.js";
 import { buildCandidateCss } from "../lib/tailwind.js";
 import { readCurrentTarget, saveUploadedTarget } from "../lib/target.js";
 
@@ -107,10 +108,11 @@ function buildPreviewFallbackDocument(input: {
 }
 
 async function getAppState() {
-  const [target, report, history] = await Promise.all([
+  const [target, report, history, runtime] = await Promise.all([
     readCurrentTarget(),
     readLatestReport(),
-    readHistory()
+    readHistory(),
+    readRuntimeStatus()
   ]);
 
   return {
@@ -127,6 +129,19 @@ async function getAppState() {
           },
     report,
     history,
+    setup: buildLaunchSetup({
+      host: HOST,
+      port: PORT,
+      target:
+        target === null
+          ? null
+          : {
+              fileName: target.fileName,
+              width: target.width,
+              height: target.height
+            },
+      runtime
+    }),
     previewUrl: `/api/preview?ts=${Date.now()}`
   };
 }

@@ -155,7 +155,17 @@
                   <div class="inspection-head">
                     <div class="inspection-copy">
                       <h3>Last scored candidate</h3>
-                      <span id="preview-meta">Matches the stored scored capture</span>
+                      <div class="inspection-meta-row">
+                        <span id="preview-meta">Appears after the first evaluation</span>
+                        <button
+                          id="evaluate-button"
+                          class="refresh-action"
+                          type="button"
+                          aria-label="Run evaluation now"
+                        >
+                          refresh
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div class="inspection-viewport">
@@ -167,40 +177,30 @@
                 <article class="inspection-column inspection-column-diff">
                   <div class="inspection-head inspection-head-diff">
                     <div class="inspection-copy">
-                      <div class="inspection-title-row">
-                        <h3>Diff inspector</h3>
-                        <div class="view-toggle" role="group" aria-label="Diff view mode">
-                          <button
-                            id="compare-toggle"
-                            class="toggle-chip is-active"
-                            type="button"
-                            data-diff-view="compare"
-                            aria-pressed="true"
-                          >
-                            Compare
-                          </button>
-                          <button
-                            id="heatmap-toggle"
-                            class="toggle-chip"
-                            type="button"
-                            data-diff-view="heatmap"
-                            aria-pressed="false"
-                          >
-                            Heatmap
-                          </button>
-                        </div>
-                      </div>
+                      <h3>Diff inspector</h3>
                       <div class="inspection-meta-row">
                         <span id="diff-meta">No capture yet</span>
-                        <button
-                          id="evaluate-button"
-                          class="refresh-action"
-                          type="button"
-                          aria-label="Run evaluation now"
-                        >
-                          (refresh)
-                        </button>
                       </div>
+                    </div>
+                    <div class="view-toggle" role="group" aria-label="Diff view mode">
+                      <button
+                        id="compare-toggle"
+                        class="toggle-chip is-active"
+                        type="button"
+                        data-diff-view="compare"
+                        aria-pressed="true"
+                      >
+                        Compare
+                      </button>
+                      <button
+                        id="heatmap-toggle"
+                        class="toggle-chip"
+                        type="button"
+                        data-diff-view="heatmap"
+                        aria-pressed="false"
+                      >
+                        Heatmap
+                      </button>
                     </div>
                   </div>
                   <div class="inspection-viewport inspection-viewport-compare">
@@ -214,6 +214,13 @@
                         <div id="compare-overlay" class="compare-overlay">
                           <img
                             id="compare-overlay-image"
+                            class="compare-image compare-image-overlay"
+                            alt="Stored candidate capture"
+                          />
+                        </div>
+                        <div id="compare-overlay-secondary" class="compare-overlay compare-overlay-secondary">
+                          <img
+                            id="compare-overlay-image-secondary"
                             class="compare-image compare-image-overlay"
                             alt="Stored candidate capture"
                           />

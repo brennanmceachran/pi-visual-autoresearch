@@ -1,11 +1,14 @@
-# Autoresearch
+# Visual Diff Autoresearch
 
-Objective: improve the `similarity` score from `pnpm research:score` by iterating on `candidate.html` and `candidate.css` only.
+## Goal
+Maximize similarity score between candidate rendering and target image.
 
-## Loop
+## Editable files
+- `candidate.html`
+- `candidate.css`
 
-1. Run `pnpm research:score`.
-2. Inspect the scorer feedback from the experiment output attachments.
-3. Make a simple deterministic visual reconstruction edit.
-4. Keep changes only when `similarity` improves.
-5. Revert losing or crashing attempts and continue.
+## Strategy
+1. Start with baseline (empty frame)
+2. Observe target image from scorer feedback
+3. Reconstruct major shapes, colors, layout
+4. Iterate on details

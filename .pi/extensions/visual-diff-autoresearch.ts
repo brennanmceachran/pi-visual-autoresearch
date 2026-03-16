@@ -7,6 +7,7 @@ import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 
 import { ROOT_DIR } from "../../src/lib/paths.js";
 import { buildScoreFeedbackBlocks } from "../../src/lib/research-feedback.js";
+import { updateRuntimeStatus } from "../../src/lib/runtime-status.js";
 import {
   getProtectedPathReason,
   getRunExperimentReason,
@@ -51,6 +52,19 @@ function appendToolResultNote(
   return [noteBlock, ...nextContent];
 }
 
+async function markSkillActive(eventName: string) {
+  const now = new Date().toISOString();
+  await updateRuntimeStatus((current) => ({
+    ...current,
+    skill: {
+      state: "active",
+      activatedAt: current.skill.activatedAt ?? now,
+      lastEventAt: now,
+      eventName
+    }
+  }));
+}
+
 type ToolResultPatch = {
   content?: (TextContent | ImageContent)[];
   details?: unknown;
@@ -76,6 +90,14 @@ export default function visualDiffAutoresearchExtension(pi: ExtensionAPI) {
   });
 
   pi.on("tool_call", async (event, ctx) => {
+    if (
+      event.toolName === "init_experiment" ||
+      event.toolName === "run_experiment" ||
+      event.toolName === "log_experiment"
+    ) {
+      await markSkillActive(event.toolName);
+    }
+
     if (isToolCallEventType("read", event)) {
       const absolutePath = resolveProjectPath(event.input.path, ctx.cwd);
       const reason = getProtectedPathReason(absolutePath);

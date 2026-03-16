@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const artifactsDir = join(root, ".artifacts", "latest");
 const sessionsDir = join(root, ".pi", "sessions");
+const runtimeStatusPath = join(root, ".pi", "runtime", "status.json");
 const privateTargetsDir = join(root, ".pi", "private", "targets");
 const legacyTargetsDir = join(root, "data", "targets");
 const targetInfoPath = join(root, "data", "target.json");
@@ -13,7 +14,8 @@ const resettableFiles = [
   join(root, "autoresearch.md"),
   join(root, "autoresearch.sh"),
   join(root, "autoresearch.ideas.md"),
-  targetInfoPath
+  targetInfoPath,
+  runtimeStatusPath
 ];
 const defaultCandidateHtml = `<main class="frame" aria-label="candidate surface"></main>
 `;

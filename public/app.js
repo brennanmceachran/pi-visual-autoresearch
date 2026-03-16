@@ -25,6 +25,7 @@ const elements = {
   targetCheckMeta: document.querySelector("#target-check-meta"),
   piCheckMeta: document.querySelector("#pi-check-meta"),
   skillCheckMeta: document.querySelector("#skill-check-meta"),
+  checkServer: document.querySelector("#check-server"),
   checkTarget: document.querySelector("#upload-form"),
   checkPi: document.querySelector("#check-pi"),
   checkSkill: document.querySelector("#check-skill"),
@@ -52,6 +53,7 @@ const elements = {
   compareStage: document.querySelector("#compare-stage"),
   compareBaseImage: document.querySelector("#compare-base-image"),
   compareOverlayImage: document.querySelector("#compare-overlay-image"),
+  compareOverlayImageSecondary: document.querySelector("#compare-overlay-image-secondary"),
   diffToggleButtons: Array.from(document.querySelectorAll("[data-diff-view]")),
   historyList: document.querySelector("#history-list"),
   historyName: document.querySelector("#history-name"),
@@ -187,7 +189,7 @@ function renderLiveTimers(appState) {
 }
 
 function setLaunchStepState(element, nextState) {
-  element.classList.remove("is-done", "is-next");
+  element.classList.remove("is-done", "is-next", "is-loading");
   if (nextState) {
     element.classList.add(nextState);
   }
@@ -600,8 +602,10 @@ function renderImages(appState, options = {}) {
 
     if (candidateUrl) {
       elements.compareOverlayImage.src = candidateUrl;
+      elements.compareOverlayImageSecondary.src = candidateUrl;
     } else {
       elements.compareOverlayImage.removeAttribute("src");
+      elements.compareOverlayImageSecondary.removeAttribute("src");
     }
 
     if (diffUrl) {
@@ -632,11 +636,13 @@ function renderImages(appState, options = {}) {
       : "Diff heatmap appears after the first evaluation.";
   }
 
-  elements.previewMeta.textContent = report
-    ? `Captured ${formatRelativeAge(report.generatedAt)}`
-    : "Appears after the first evaluation";
+  const diffSummary = report
+    ? `${formatMetric(report.difference, "%")} diff · ${formatRelativeAge(report.generatedAt)}`
+    : null;
+
+  elements.previewMeta.textContent = diffSummary ?? "Appears after the first evaluation";
   elements.diffMeta.textContent = report
-    ? formatRelativeAge(report.generatedAt)
+    ? diffSummary
     : "No capture yet";
 }
 
@@ -680,30 +686,48 @@ function renderLaunch(appState) {
   const target = appState.target;
   const hasTarget = Boolean(target);
   const hasReport = Boolean(appState.report);
+  const setup = appState.setup ?? null;
 
-  setLaunchStepState(elements.checkTarget, hasTarget ? "is-done" : "is-next");
-  setLaunchStepState(elements.checkPi, hasTarget ? "is-next" : "");
-  setLaunchStepState(elements.checkSkill, hasTarget ? "is-next" : "");
+  function mapLaunchState(nextState) {
+    if (nextState === "ready") return "is-done";
+    if (nextState === "loading") return "is-loading";
+    if (nextState === "waiting") return "is-next";
+    return "";
+  }
 
-  elements.targetCheckMeta.textContent = hasTarget
-    ? "ready"
-    : "no target set";
-  elements.piCheckMeta.textContent = hasTarget
-    ? "pnpm pi"
-    : "waiting for target";
-  elements.skillCheckMeta.textContent = hasTarget
-    ? "/skill:visual-diff-autoresearch"
-    : "waiting for Pi";
+  setLaunchStepState(
+    elements.checkServer,
+    mapLaunchState(setup?.server?.state ?? "ready")
+  );
+  setLaunchStepState(
+    elements.checkTarget,
+    mapLaunchState(setup?.target?.state ?? (hasTarget ? "ready" : "waiting"))
+  );
+  setLaunchStepState(
+    elements.checkPi,
+    mapLaunchState(setup?.pi?.state ?? (hasTarget ? "waiting" : ""))
+  );
+  setLaunchStepState(
+    elements.checkSkill,
+    mapLaunchState(setup?.skill?.state ?? (hasTarget ? "waiting" : ""))
+  );
+
+  elements.targetCheckMeta.textContent =
+    setup?.target?.meta ?? (hasTarget ? "ready" : "no target set");
+  elements.piCheckMeta.textContent =
+    setup?.pi?.meta ?? (hasTarget ? "pnpm pi" : "waiting for target");
+  elements.skillCheckMeta.textContent =
+    setup?.skill?.meta ?? (hasTarget ? "/skill:visual-diff-autoresearch" : "waiting for Pi");
   elements.uploadButton.textContent = hasTarget
     ? "Replace"
     : "Upload target";
   elements.uploadForm.classList.toggle("is-empty", !hasTarget);
 
-  elements.headerState.textContent = hasTarget
+  elements.headerState.textContent = setup?.headline ?? (hasTarget
     ? hasReport
       ? "Live target locked. Pi can keep iterating while the curve settles."
       : "Target loaded. Start Pi and run the skill."
-    : "Upload a target to start a new battleground session.";
+    : "Upload a target to start a new battleground session.");
 }
 
 function renderSummary(appState) {
