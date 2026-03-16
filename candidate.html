@@ -1,1 +1,221 @@
-<main class="frame" aria-label="candidate surface"></main>
+<main class="frame" aria-label="candidate surface">
+<style>
+.frame { font-family: -apple-system, system-ui, sans-serif; }
+.title { position:absolute; width:100%; text-align:center; top:10px; font-family:Georgia,serif; font-size:28px; color:#333; }
+.subtitle { position:absolute; width:100%; text-align:center; top:44px; font-size:15px; color:#666; }
+.grid-line { position:absolute; left:95px; width:965px; height:0; border-top:1px solid #d5d3ce; }
+.y-label { position:absolute; left:0; width:82px; text-align:right; font-size:15px; color:#888; }
+.x-label { position:absolute; top:1258px; font-size:15px; color:#888; text-align:center; }
+.y-axis { position:absolute; left:95px; top:100px; width:0; height:1140px; border-left:1px solid #aaa; }
+.x-title { position:absolute; bottom:16px; width:100%; text-align:center; font-size:15px; color:#666; font-style:italic; }
+.y-title { position:absolute; left:-240px; top:670px; width:560px; text-align:center; font-size:15px; color:#666; transform:rotate(-90deg); }
+/* Data points */
+.dot { position:absolute; border-radius:50%; }
+.sq { position:absolute; }
+.lbl { position:absolute; font-size:13px; color:#555; white-space:nowrap; }
+.lbl-bold { position:absolute; font-size:14px; color:#333; font-weight:bold; white-space:nowrap; }
+.lbl-sub { position:absolute; font-size:12px; color:#555; white-space:nowrap; }
+</style>
+
+<div class="title">Pareto Frontier</div>
+<div class="subtitle">Diagnostic Accuracy vs Care Administration Cost (USD)</div>
+
+<!-- Y-axis -->
+<div class="y-axis"></div>
+<div class="y-title">Diagnostic Accuracy (%)</div>
+
+<!-- Grid lines: 0%=1240, 100%=100, spacing=114px -->
+<!-- 0: y=1240, 10: y=1126, 20: y=1012, 30: y=898, 40: y=784, 50: y=670, 60: y=556, 70: y=442, 80: y=328, 90: y=214, 100: y=100 -->
+<div class="grid-line" style="top:100px;"></div>
+<div class="grid-line" style="top:214px;"></div>
+<div class="grid-line" style="top:328px;"></div>
+<div class="grid-line" style="top:442px;"></div>
+<div class="grid-line" style="top:556px;"></div>
+<div class="grid-line" style="top:670px;"></div>
+<div class="grid-line" style="top:784px;"></div>
+<div class="grid-line" style="top:898px;"></div>
+<div class="grid-line" style="top:1012px;"></div>
+<div class="grid-line" style="top:1126px;"></div>
+<div class="grid-line" style="top:1240px;"></div>
+
+<!-- Y-axis labels -->
+<div class="y-label" style="top:92px;">100</div>
+<div class="y-label" style="top:206px;">90</div>
+<div class="y-label" style="top:320px;">80</div>
+<div class="y-label" style="top:434px;">70</div>
+<div class="y-label" style="top:548px;">60</div>
+<div class="y-label" style="top:662px;">50</div>
+<div class="y-label" style="top:776px;">40</div>
+<div class="y-label" style="top:890px;">30</div>
+<div class="y-label" style="top:1004px;">20</div>
+<div class="y-label" style="top:1118px;"></div>
+<div class="y-label" style="top:1232px;">0</div>
+
+<!-- X-axis labels: $0=95, $8000=1060. Spacing=(1060-95)/8=120.6 -->
+<div class="x-label" style="left:80px;">$0</div>
+<div class="x-label" style="left:196px;">$1000</div>
+<div class="x-label" style="left:316px;">$2000</div>
+<div class="x-label" style="left:437px;">$3000</div>
+<div class="x-label" style="left:557px;">$4000</div>
+<div class="x-label" style="left:677px;">$5000</div>
+<div class="x-label" style="left:798px;">$6000</div>
+<div class="x-label" style="left:918px;">$7000</div>
+<div class="x-label" style="left:1038px;">$8000</div>
+
+<div class="x-title">Average Cost of Diagnostic Tests Per Case (USD)</div>
+
+<!-- Data points using absolute positioning -->
+<!-- Coordinate helper: x(d) = 95 + d/8000*965, y(p) = 1240 - p/100*1140 -->
+<!-- Microsoft circles (gray-purple, r=9) -->
+<!-- $100, 37.5% -> x=107, y=812 -->
+<div class="dot" style="left:98px;top:803px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:120px;top:810px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:120px;top:826px;">(Instant answer)</div>
+
+<!-- $500, 51.5% -> x=155, y=653 -->
+<div class="dot" style="left:146px;top:644px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:90px;top:633px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:90px;top:649px;">(questions only)</div>
+
+<!-- $1500, 72% -> x=276, y=419 -->
+<div class="dot" style="left:267px;top:410px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:195px;top:393px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:200px;top:409px;">($2k budget)</div>
+
+<!-- $2000, 75% -> x=336, y=385 -->
+<div class="dot" style="left:327px;top:376px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:240px;top:358px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:248px;top:374px;">($4k budget)</div>
+
+<!-- $2500, 80% -> x=397, y=328 -->
+<div class="dot" style="left:388px;top:319px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:328px;top:300px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:338px;top:316px;">($8k budget)</div>
+
+<!-- $4800, 83% -> x=674, y=294 -->
+<div class="dot" style="left:665px;top:285px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:612px;top:266px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:600px;top:282px;">(unconstrained)</div>
+
+<!-- $7000, 87.5% -> x=940, y=243 -->
+<div class="dot" style="left:931px;top:234px;width:18px;height:18px;background:rgb(140,130,155);"></div>
+<div class="lbl-bold" style="left:870px;top:216px;">MAI-DxO</div>
+<div class="lbl-sub" style="left:888px;top:232px;">(ensemble)</div>
+
+<!-- OpenAI squares (dark green) -->
+<!-- gpt 3.5 turbo: $2000, 25% -> x=336, y=955 -->
+<div class="sq" style="left:329px;top:948px;width:14px;height:14px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:310px;top:966px;">gpt 3.5 turbo</div>
+
+<!-- gpt 4o: $2200, 49.5% -> x=360, y=676 -->
+<div class="sq" style="left:353px;top:669px;width:12px;height:12px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:340px;top:685px;">gpt 4o</div>
+
+<!-- gpt 4.1 nano: $3000, 35% -> x=457, y=841 -->
+<div class="sq" style="left:450px;top:834px;width:14px;height:14px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:412px;top:852px;">gpt 4.1 nano</div>
+
+<!-- gpt 4.1 mini: $3500, 53% -> x=517, y=636 -->
+<div class="sq" style="left:511px;top:630px;width:12px;height:12px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:435px;top:618px;">gpt 4.1 mini</div>
+
+<!-- gpt 4.1: $4500, 63% -> x=638, y=522 -->
+<div class="sq" style="left:632px;top:516px;width:13px;height:13px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:648px;top:510px;">gpt 4.1</div>
+
+<!-- o4 mini: $6200, 70% -> x=843, y=442 -->
+<div class="sq" style="left:837px;top:436px;width:14px;height:14px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:820px;top:420px;">o4 mini</div>
+
+<!-- o3: $7500, 78% -> x=1000, y=351 -->
+<div class="sq" style="left:993px;top:344px;width:16px;height:16px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:988px;top:330px;">o3</div>
+
+<!-- Anthropic pentagons (olive/yellow-green) - use circles as approximation -->
+<!-- claude-4-sonnet: $6500, 63% -> x=879, y=522 -->
+<div class="dot" style="left:870px;top:513px;width:20px;height:20px;background:rgb(155,165,65);border-radius:30%;"></div>
+<div class="lbl" style="left:858px;top:537px;">claude-4-sonnet</div>
+
+<!-- claude-4-opus: $6800, 68% -> x=916, y=465 -->
+<div class="dot" style="left:907px;top:456px;width:20px;height:20px;background:rgb(155,165,65);border-radius:30%;"></div>
+<div class="lbl" style="left:870px;top:442px;">claude-4-opus</div>
+
+<!-- Google triangles (teal) - use rotated squares -->
+<!-- gemini 2.5 flash: $5500, 57% -> x=759, y=591 -->
+<div style="position:absolute;left:752px;top:584px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid rgb(90,185,185);"></div>
+<div class="lbl" style="left:772px;top:584px;">gemini 2.5 flash</div>
+
+<!-- gemini 2.5 pro: $4800, 69% -> x=674, y=454 -->
+<div style="position:absolute;left:667px;top:447px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid rgb(90,185,185);"></div>
+<div class="lbl" style="left:688px;top:448px;">gemini 2.5 pro</div>
+
+<!-- Meta diamond (light blue) -->
+<!-- llama-4-maverick: $4300, 53.5% -> x=614, y=631 -->
+<div style="position:absolute;left:607px;top:624px;width:14px;height:14px;background:rgb(130,170,210);transform:rotate(45deg);"></div>
+<div class="lbl" style="left:626px;top:632px;">llama-4-maverick</div>
+
+<!-- xAI triangles down (dark purple) -->
+<!-- grok-3: $4600, 58% -> x=650, y=579 -->
+<div style="position:absolute;left:643px;top:576px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid rgb(95,80,145);"></div>
+<div class="lbl" style="left:662px;top:572px;">grok-3</div>
+
+<!-- grok-3-mini: $4500, 55% -> x=638, y=613 -->
+<div style="position:absolute;left:631px;top:610px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid rgb(95,80,145);"></div>
+<div class="lbl" style="left:650px;top:605px;">grok-3-mini</div>
+
+<!-- Deepseek circle (pink) -->
+<!-- deepseek-r1: $4200, 47.5% -> x=602, y=699 -->
+<div class="dot" style="left:593px;top:690px;width:18px;height:18px;background:rgb(200,145,145);"></div>
+<div class="lbl" style="left:616px;top:694px;">deepseek-r1</div>
+
+<!-- Physicians cross (red) -->
+<!-- $3000, 20.5% -> x=457, y=1006 -->
+<div style="position:absolute;left:445px;top:1002px;width:24px;height:4px;background:red;"></div>
+<div style="position:absolute;left:455px;top:992px;width:4px;height:24px;background:red;"></div>
+
+<!-- Legend -->
+<div style="position:absolute;left:1090px;top:618px;font-size:16px;font-weight:bold;color:#333;">Company</div>
+<div class="dot" style="left:1098px;top:640px;width:14px;height:14px;background:rgb(140,130,155);"></div>
+<div class="lbl" style="left:1118px;top:642px;font-size:14px;">Microsoft</div>
+<div class="sq" style="left:1098px;top:668px;width:14px;height:14px;background:rgb(75,120,85);"></div>
+<div class="lbl" style="left:1118px;top:670px;font-size:14px;">OpenAI</div>
+<div class="dot" style="left:1098px;top:696px;width:14px;height:14px;background:rgb(155,165,65);border-radius:30%;"></div>
+<div class="lbl" style="left:1118px;top:698px;font-size:14px;">Anthropic</div>
+<div style="position:absolute;left:1098px;top:720px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid rgb(90,185,185);"></div>
+<div class="lbl" style="left:1118px;top:724px;font-size:14px;">Google</div>
+<div style="position:absolute;left:1100px;top:749px;width:10px;height:10px;background:rgb(130,170,210);transform:rotate(45deg);"></div>
+<div class="lbl" style="left:1118px;top:749px;font-size:14px;">Meta</div>
+<div style="position:absolute;left:1098px;top:774px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:12px solid rgb(95,80,145);"></div>
+<div class="lbl" style="left:1118px;top:774px;font-size:14px;">xAI</div>
+<div class="dot" style="left:1098px;top:800px;width:14px;height:14px;background:rgb(200,145,145);"></div>
+<div class="lbl" style="left:1118px;top:802px;font-size:14px;">Deepseek</div>
+
+<!-- Physicians legend -->
+<div style="position:absolute;left:1090px;top:838px;font-size:16px;font-weight:bold;color:red;">Physicians</div>
+<div style="position:absolute;left:1096px;top:858px;width:18px;height:3px;background:red;"></div>
+<div style="position:absolute;left:1103px;top:851px;width:3px;height:18px;background:red;"></div>
+<div class="lbl" style="left:1118px;top:860px;font-size:14px;">Overall</div>
+
+<!-- Pareto Frontiers legend -->
+<div style="position:absolute;left:1090px;top:898px;font-size:16px;font-weight:bold;color:rgb(120,90,160);">Pareto Frontiers</div>
+<div style="position:absolute;left:1090px;top:922px;width:40px;height:0;border-top:2px dashed #555;"></div>
+<div class="lbl" style="left:1138px;top:918px;font-size:13px;">Baseline Pareto Frontier</div>
+<div style="position:absolute;left:1090px;top:946px;width:40px;height:0;border-top:2px solid rgb(140,110,180);"></div>
+<div class="lbl" style="left:1138px;top:942px;font-size:13px;">Enhanced Agent Frontier</div>
+
+<!-- SVG overlay for lines -->
+<svg style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 1420 1354" preserveAspectRatio="none">
+  <!-- Enhanced Agent Frontier fill -->
+  <polygon fill="rgba(170,150,210,0.2)" points="
+    107,1240 107,812 155,653 276,419 336,385 397,328 674,294 940,243 940,1240
+  "/>
+  <!-- Enhanced Agent Frontier line -->
+  <polyline fill="none" stroke="rgba(140,110,180,0.7)" stroke-width="2" points="
+    107,812 155,653 276,419 336,385 397,328 674,294 940,243
+  "/>
+  <!-- Baseline Pareto Frontier dashed -->
+  <polyline fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="7,5" points="
+    155,653 360,676 517,636 614,631 638,613 650,579 674,522 674,454 843,442 1000,351
+  "/>
+</svg>
+</main>
