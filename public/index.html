@@ -109,6 +109,14 @@
                 </div>
               </div>
 
+              <div
+                id="summary-splitter"
+                class="splitter splitter-vertical summary-splitter"
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize current match and diff curve panels"
+              ></div>
+
               <div class="curve-block">
                 <div class="curve-head">
                   <div>
@@ -130,11 +138,20 @@
                 <div class="curve-shell">
                   <div class="curve-canvas-shell">
                     <canvas id="curve-canvas" aria-label="Visual diff progress chart"></canvas>
+                    <span class="curve-axis-label curve-axis-label-x" aria-hidden="true">Runs</span>
                   </div>
                   <div id="curve-tooltip" class="curve-tooltip" hidden></div>
                 </div>
               </div>
             </section>
+
+            <div
+              id="evaluation-splitter"
+              class="splitter splitter-horizontal evaluation-splitter"
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label="Resize top analysis area and lower inspection panels"
+            ></div>
 
             <section class="arena-panel">
               <div class="inspection-shell">
@@ -240,6 +257,14 @@
             </section>
             </section>
           </main>
+
+          <div
+            id="sidebar-splitter"
+            class="splitter splitter-vertical dashboard-splitter"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize diff curve and run log panels"
+          ></div>
 
           <aside class="sidebar">
             <section class="history-panel">

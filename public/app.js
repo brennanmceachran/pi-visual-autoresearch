@@ -1,4 +1,11 @@
 const POLL_INTERVAL_MS = 4000;
+const LAYOUT_STORAGE_KEY = "pi-battleground-layout-v1";
+const LAYOUT_DEFAULTS = {
+  sidebarWidth: 380,
+  summaryRailWidth: 308,
+  inspectionHeight: 220
+};
+const SPLITTER_SIZE = 12;
 
 const state = {
   appState: null,
@@ -13,7 +20,11 @@ const state = {
   lastReportKey: null,
   pollTimer: null,
   liveTimer: null,
-  curveChart: null
+  curveChart: null,
+  curveResizeObserver: null,
+  drag: null,
+  layoutResizeFrame: null,
+  layout: { ...LAYOUT_DEFAULTS }
 };
 
 const elements = {
@@ -57,9 +68,16 @@ const elements = {
   diffToggleButtons: Array.from(document.querySelectorAll("[data-diff-view]")),
   historyList: document.querySelector("#history-list"),
   historyName: document.querySelector("#history-name"),
+  dashboardBody: document.querySelector(".dashboard-body"),
+  summaryPanel: document.querySelector(".summary-panel"),
+  evaluationShell: document.querySelector(".evaluation-shell"),
   curveShell: document.querySelector(".curve-shell"),
+  curveCanvasShell: document.querySelector(".curve-canvas-shell"),
   curveCanvas: document.querySelector("#curve-canvas"),
-  curveTooltip: document.querySelector("#curve-tooltip")
+  curveTooltip: document.querySelector("#curve-tooltip"),
+  summarySplitter: document.querySelector("#summary-splitter"),
+  evaluationSplitter: document.querySelector("#evaluation-splitter"),
+  sidebarSplitter: document.querySelector("#sidebar-splitter")
 };
 
 function setBusy(nextBusy) {
@@ -225,6 +243,168 @@ function setFrameAspect(target) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function loadLayoutState() {
+  try {
+    const raw = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (!raw) {
+      return { ...LAYOUT_DEFAULTS };
+    }
+
+    const parsed = JSON.parse(raw);
+    return {
+      sidebarWidth:
+        typeof parsed?.sidebarWidth === "number"
+          ? parsed.sidebarWidth
+          : LAYOUT_DEFAULTS.sidebarWidth,
+      summaryRailWidth:
+        typeof parsed?.summaryRailWidth === "number"
+          ? parsed.summaryRailWidth
+          : LAYOUT_DEFAULTS.summaryRailWidth,
+      inspectionHeight:
+        typeof parsed?.inspectionHeight === "number"
+          ? parsed.inspectionHeight
+          : LAYOUT_DEFAULTS.inspectionHeight
+    };
+  } catch {
+    return { ...LAYOUT_DEFAULTS };
+  }
+}
+
+function saveLayoutState() {
+  try {
+    window.localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(state.layout));
+  } catch {
+    // Ignore storage failures in privacy-constrained browsers.
+  }
+}
+
+function applyLayoutState() {
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty("--sidebar-width", `${state.layout.sidebarWidth}px`);
+  rootStyle.setProperty("--summary-rail-width", `${state.layout.summaryRailWidth}px`);
+  rootStyle.setProperty("--inspection-height", `${state.layout.inspectionHeight}px`);
+}
+
+function scheduleCurveResize() {
+  if (state.layoutResizeFrame !== null) {
+    return;
+  }
+
+  state.layoutResizeFrame = window.requestAnimationFrame(() => {
+    state.layoutResizeFrame = null;
+    if (state.curveChart) {
+      state.curveChart.resize();
+      state.curveChart.update("none");
+    }
+  });
+}
+
+function getSidebarBounds() {
+  const rect = elements.dashboardBody?.getBoundingClientRect();
+  if (!rect) {
+    return { min: 320, max: 560 };
+  }
+
+  const min = 320;
+  const hardMax = window.innerWidth >= 1500 ? 620 : 560;
+  const max = Math.max(min, Math.min(hardMax, rect.width - 420));
+  return { min, max };
+}
+
+function getSummaryBounds() {
+  const rect = elements.summaryPanel?.getBoundingClientRect();
+  if (!rect) {
+    return { min: 220, max: 420 };
+  }
+
+  const min = 220;
+  const hardMax = window.innerWidth >= 1500 ? 460 : 420;
+  const max = Math.max(min, Math.min(hardMax, rect.width - 360));
+  return { min, max };
+}
+
+function getInspectionBounds() {
+  const rect = elements.evaluationShell?.getBoundingClientRect();
+  if (!rect) {
+    return { min: 180, max: 420 };
+  }
+
+  const min = 180;
+  const max = Math.max(min, Math.min(420, rect.height - 220));
+  return { min, max };
+}
+
+function updateLayoutFromPointer(event) {
+  if (!state.drag) {
+    return;
+  }
+
+  if (state.drag.type === "sidebar") {
+    const rect = elements.dashboardBody?.getBoundingClientRect();
+    if (!rect) return;
+    const bounds = getSidebarBounds();
+    state.layout.sidebarWidth = clamp(
+      rect.right - event.clientX - SPLITTER_SIZE / 2,
+      bounds.min,
+      bounds.max
+    );
+  }
+
+  if (state.drag.type === "summary") {
+    const rect = elements.summaryPanel?.getBoundingClientRect();
+    if (!rect) return;
+    const bounds = getSummaryBounds();
+    state.layout.summaryRailWidth = clamp(
+      event.clientX - rect.left - SPLITTER_SIZE / 2,
+      bounds.min,
+      bounds.max
+    );
+  }
+
+  if (state.drag.type === "evaluation") {
+    const rect = elements.evaluationShell?.getBoundingClientRect();
+    if (!rect) return;
+    const bounds = getInspectionBounds();
+    state.layout.inspectionHeight = clamp(
+      rect.bottom - event.clientY - SPLITTER_SIZE / 2,
+      bounds.min,
+      bounds.max
+    );
+  }
+
+  applyLayoutState();
+  scheduleCurveResize();
+}
+
+function endLayoutDrag(pointerId) {
+  if (!state.drag || (typeof pointerId === "number" && pointerId !== state.drag.pointerId)) {
+    return;
+  }
+
+  state.drag.splitter.classList.remove("is-dragging");
+  document.body.classList.remove("is-resizing", "is-resizing-row");
+  saveLayoutState();
+  scheduleCurveResize();
+  state.drag = null;
+}
+
+function beginLayoutDrag(type, splitter, event) {
+  if (window.innerWidth <= 1200) {
+    return;
+  }
+
+  state.drag = {
+    type,
+    splitter,
+    pointerId: event.pointerId
+  };
+
+  splitter.classList.add("is-dragging");
+  document.body.classList.add(type === "evaluation" ? "is-resizing-row" : "is-resizing");
+  event.preventDefault();
+  updateLayoutFromPointer(event);
 }
 
 function setComparePosition(x, y) {
@@ -443,7 +623,7 @@ function createCurveChart() {
             }
           },
           title: {
-            display: true,
+            display: false,
             text: "Runs",
             color: "rgba(17, 17, 17, 0.48)",
             align: "end",
@@ -493,6 +673,13 @@ function createCurveChart() {
   });
 
   window.__curveChart = state.curveChart;
+
+  if (!state.curveResizeObserver && window.ResizeObserver && elements.curveCanvasShell) {
+    state.curveResizeObserver = new window.ResizeObserver(() => {
+      scheduleCurveResize();
+    });
+    state.curveResizeObserver.observe(elements.curveCanvasShell);
+  }
 }
 
 function drawCurve(appState) {
@@ -938,6 +1125,40 @@ state.liveTimer = window.setInterval(() => {
 
 setDiffView(state.diffView);
 setComparePosition(state.compareX, state.compareY);
+state.layout = loadLayoutState();
+applyLayoutState();
+
+for (const [type, splitter] of [
+  ["summary", elements.summarySplitter],
+  ["evaluation", elements.evaluationSplitter],
+  ["sidebar", elements.sidebarSplitter]
+]) {
+  if (!splitter) continue;
+
+  splitter.addEventListener("pointerdown", (event) => {
+    beginLayoutDrag(type, splitter, event);
+  });
+}
+
+window.addEventListener("pointermove", (event) => {
+  if (!state.drag || event.pointerId !== state.drag.pointerId) {
+    return;
+  }
+
+  updateLayoutFromPointer(event);
+});
+
+window.addEventListener("pointerup", (event) => {
+  endLayoutDrag(event.pointerId);
+});
+
+window.addEventListener("pointercancel", (event) => {
+  endLayoutDrag(event.pointerId);
+});
+
+window.addEventListener("resize", () => {
+  scheduleCurveResize();
+});
 
 refreshState({ force: true }).catch((error) => {
   setFeedback(error instanceof Error ? error.message : String(error), true);
