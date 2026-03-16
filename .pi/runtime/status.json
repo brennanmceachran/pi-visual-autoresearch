@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-16T12:25:04.876Z",
+  "updatedAt": "2026-03-16T12:25:41.627Z",
   "pi": {
     "state": "running",
     "pid": 59299,
     "startedAt": "2026-03-16T12:24:12.533Z",
-    "heartbeatAt": "2026-03-16T12:25:02.554Z",
+    "heartbeatAt": "2026-03-16T12:25:40.069Z",
     "exitedAt": null
   },
   "skill": {
     "state": "active",
     "activatedAt": "2026-03-16T12:24:40.373Z",
-    "lastEventAt": "2026-03-16T12:25:04.873Z",
+    "lastEventAt": "2026-03-16T12:25:41.620Z",
     "eventName": "log_experiment"
   }
 }
