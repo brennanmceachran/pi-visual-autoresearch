@@ -3,7 +3,7 @@
 > Upload a target image. Let Pi grind HTML/CSS against it until the diff collapses.
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/60aa6d24-4689-42c1-b62a-a959f9544b0a" controls muted playsinline width="980"></video>
+  <video src="https://github.com/user-attachments/assets/60aa6d24-4689-42c1-b62a-a959f9544b0a" poster="docs/media/pi-visual-autoresearch-demo-poster.png" controls muted playsinline width="980"></video>
 </p>
 
 <p align="center">
