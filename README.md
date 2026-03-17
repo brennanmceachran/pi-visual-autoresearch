@@ -3,13 +3,11 @@
 > Upload a target image. Let Pi grind HTML/CSS against it until the diff collapses.
 
 <p align="center">
-  <a href="docs/media/pi-visual-autoresearch-demo.mp4">
-    <img src="docs/media/pi-visual-autoresearch-demo-poster.png" alt="Watch the Pi Visual Autoresearch walkthrough video" width="980" />
-  </a>
+  <video src="https://github.com/user-attachments/assets/60aa6d24-4689-42c1-b62a-a959f9544b0a" controls muted playsinline width="980"></video>
 </p>
 
 <p align="center">
-  <a href="docs/media/pi-visual-autoresearch-demo.mp4"><strong>Watch the full walkthrough video</strong></a>
+  <a href="https://github.com/user-attachments/assets/60aa6d24-4689-42c1-b62a-a959f9544b0a"><strong>Watch the full walkthrough video</strong></a>
 </p>
 
 Pi Visual Autoresearch turns Pi into a visual reconstruction loop:
