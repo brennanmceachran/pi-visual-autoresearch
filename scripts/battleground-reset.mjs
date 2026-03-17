@@ -1,8 +1,8 @@
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { ensureArenaGitWorkspace } from "./arena-git.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const arenaDir = join(root, "arena");
@@ -67,8 +67,7 @@ async function clearDirectory(directory, keep = []) {
 }
 
 function commitArenaBaseline() {
-  const gitDir = join(arenaDir, ".git");
-  if (!existsSync(gitDir)) return;
+  ensureArenaGitWorkspace(arenaDir);
 
   execFileSync("git", ["-C", arenaDir, "clean", "-fd"], { stdio: "pipe" });
   execFileSync("git", ["-C", arenaDir, "add", "-A"], { stdio: "pipe" });

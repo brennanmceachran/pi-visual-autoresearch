@@ -8,6 +8,7 @@ import {
 import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ensureArenaGitWorkspace } from "./arena-git.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const arenaDir = resolve(root, "arena");
@@ -27,6 +28,7 @@ mkdirSync(arenaDir, { recursive: true });
 mkdirSync(arenaSkillsDir, { recursive: true });
 mkdirSync(sessionsDir, { recursive: true });
 mkdirSync(runtimeDir, { recursive: true });
+ensureArenaGitWorkspace(arenaDir);
 
 function defaultRuntimeStatus() {
   return {
