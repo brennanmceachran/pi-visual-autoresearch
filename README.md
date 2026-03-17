@@ -3,7 +3,9 @@
 > Upload a target image. Let Pi grind HTML/CSS against it until the diff collapses.
 
 <p align="center">
-  <video src="docs/media/pi-visual-autoresearch-demo.mp4" poster="docs/media/thread-explainer.png" controls muted playsinline width="980"></video>
+  <a href="docs/media/pi-visual-autoresearch-demo.mp4">
+    <img src="docs/media/pi-visual-autoresearch-demo-poster.png" alt="Watch the Pi Visual Autoresearch walkthrough video" width="980" />
+  </a>
 </p>
 
 <p align="center">
